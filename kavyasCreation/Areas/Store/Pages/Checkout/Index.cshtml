@@ -3,19 +3,44 @@
 @{
     ViewData["Title"] = "Checkout";
 }
-<section class="bg-white rounded-3 shadow-sm p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1 class="display-6 mb-1">Checkout</h1>
-            <p class="text-muted mb-0">Review your order before payment.</p>
-        </div>
-        <a class="btn btn-outline-secondary" asp-page="/Cart/Index" asp-area="Store">Back to Cart</a>
-    </div>
 
-    @if (!Model.Items.Any())
-    {
-        <div class="alert alert-info">Your cart is empty.</div>
-    }
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light rounded-3 p-3 shadow-sm">
+        <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+        <li class="breadcrumb-item"><a asp-area="Store" asp-page="/Catalog/Index">Catalog</a></li>
+        <li class="breadcrumb-item"><a asp-area="Store" asp-page="/Cart/Index">Cart</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+    </ol>
+</nav>
+
+<section class="bg-white rounded-3 shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 mb-1">
+                <i class="bi bi-credit-card text-primary"></i> Secure Checkout
+            </h1>
+            <p class="text-muted mb-0">Complete your order securely</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Cart/Index" asp-area="Store">
+            <i class="bi bi-arrow-left"></i> Back to Cart
+        </a>
+    </div>
+</section>
+
+@if (!Model.Items.Any())
+{
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-cart-x display-1 text-muted"></i>
+        </div>
+        <h3 class="text-muted mb-3">Your cart is empty</h3>
+        <p class="text-muted mb-4">Add items to your cart before checking out.</p>
+        <a class="btn btn-primary btn-lg" asp-page="/Catalog/Index" asp-area="Store">
+            <i class="bi bi-shop"></i> Browse Products
+        </a>
+    </div>
+}
     else
     {
         <div class="row g-4">
