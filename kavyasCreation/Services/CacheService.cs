@@ -14,11 +14,13 @@ namespace kavyasCreation.Services
     {
         private readonly IMemoryCache _cache;
         private readonly ILogger<CacheService> _logger;
+        private readonly IConfiguration _configuration;
 
-        public CacheService(IMemoryCache cache, ILogger<CacheService> logger)
+        public CacheService(IMemoryCache cache, ILogger<CacheService> logger, IConfiguration configuration)
         {
             _cache = cache;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public T? Get<T>(string key)
@@ -46,7 +48,8 @@ namespace kavyasCreation.Services
                 }
                 else
                 {
-                    cacheOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+                    var defaultExpirationMinutes = _configuration.GetValue<int>("Cache:DefaultExpirationMinutes", 30);
+                    cacheOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(defaultExpirationMinutes);
                 }
 
                 _cache.Set(key, value, cacheOptions);

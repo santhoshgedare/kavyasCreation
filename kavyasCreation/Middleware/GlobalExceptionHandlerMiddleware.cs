@@ -40,7 +40,7 @@ namespace kavyasCreation.Middleware
                 Message = _env.IsDevelopment() 
                     ? exception.Message 
                     : "An error occurred while processing your request. Please try again later.",
-                Detailed = _env.IsDevelopment() ? exception.ToString() : null
+                Details = _env.IsDevelopment() ? exception.ToString() : null
             };
 
             var options = new JsonSerializerOptions
