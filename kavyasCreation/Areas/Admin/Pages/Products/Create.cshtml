@@ -1,0 +1,180 @@
+@page
+@model kavyasCreation.Areas.Admin.Pages.Products.CreateModel
+@{
+    ViewData["Title"] = "Add Product";
+}
+<section class="bg-white rounded-3 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="display-6 mb-1">Add Product</h1>
+            <p class="text-muted mb-0">Create a new product for the catalog.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Products/Index" asp-area="Admin">Back</a>
+    </div>
+    <form method="post" class="mt-3" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input class="form-control" asp-for="Product.Name" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" asp-for="Product.CategoryId">
+                <option value="">Select category</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" asp-for="Product.Description" rows="3"></textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Price</label>
+                <input class="form-control" asp-for="Product.Price" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Stock</label>
+                <input class="form-control" asp-for="Product.Stock" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Images</label>
+                <input id="imageUploadsCreate" class="form-control" type="file" asp-for="ImageUploads" accept="image/*" multiple />
+                <div class="form-text">Upload one or more product images.</div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Selected Images</label>
+            <div id="imageUploadListCreate" class="d-flex flex-column gap-2"></div>
+            <div class="form-text">Drag to reorder before saving.</div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Specification Key</label>
+                <input class="form-control" asp-for="SpecKey" placeholder="e.g., Battery" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Specification Value</label>
+                <input class="form-control" asp-for="SpecValue" placeholder="e.g., 30 hours" />
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" type="submit">Save</button>
+            <a class="btn btn-outline-secondary" asp-page="/Products/Index" asp-area="Admin">Cancel</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const input = document.getElementById("imageUploadsCreate");
+            const list = document.getElementById("imageUploadListCreate");
+            if (!input || !list) return;
+
+            const dt = new DataTransfer();
+            let dragIndex = null;
+
+            const render = () => {
+                list.innerHTML = "";
+                const files = [...dt.files];
+                files.forEach((file, index) => {
+                    const row = document.createElement("div");
+                    row.className = "d-flex align-items-center justify-content-between border rounded p-2";
+                    row.draggable = true;
+
+                    const left = document.createElement("div");
+                    left.className = "d-flex align-items-center gap-2";
+
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(file);
+                    img.className = "rounded";
+                    img.style.width = "60px";
+                    img.style.height = "60px";
+                    img.style.objectFit = "cover";
+
+                    const info = document.createElement("div");
+                    info.innerHTML = `<div class="fw-semibold">${file.name}</div><div class="text-muted small">${Math.round(file.size / 1024)} KB</div>`;
+
+                    left.appendChild(img);
+                    left.appendChild(info);
+
+                    const actions = document.createElement("div");
+                    actions.className = "d-flex gap-1";
+
+                    const up = document.createElement("button");
+                    up.type = "button";
+                    up.className = "btn btn-outline-secondary btn-sm";
+                    up.textContent = "Up";
+                    up.addEventListener("click", () => move(index, -1));
+
+                    const down = document.createElement("button");
+                    down.type = "button";
+                    down.className = "btn btn-outline-secondary btn-sm";
+                    down.textContent = "Down";
+                    down.addEventListener("click", () => move(index, 1));
+
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = "btn btn-outline-danger btn-sm";
+                    remove.textContent = "Remove";
+                    remove.addEventListener("click", () => removeAt(index));
+
+                    actions.appendChild(up);
+                    actions.appendChild(down);
+                    actions.appendChild(remove);
+
+                    row.appendChild(left);
+                    row.appendChild(actions);
+                    list.appendChild(row);
+
+                    row.addEventListener("dragstart", () => {
+                        dragIndex = index;
+                    });
+                    row.addEventListener("dragover", (event) => {
+                        event.preventDefault();
+                    });
+                    row.addEventListener("drop", (event) => {
+                        event.preventDefault();
+                        if (dragIndex === null || dragIndex === index) return;
+                        const temp = files[dragIndex];
+                        files.splice(dragIndex, 1);
+                        files.splice(index, 0, temp);
+                        dt.items.clear();
+                        files.forEach(file => dt.items.add(file));
+                        dragIndex = null;
+                        render();
+                    });
+                });
+
+                input.files = dt.files;
+            };
+
+            const move = (index, direction) => {
+                const files = [...dt.files];
+                const swapIndex = index + direction;
+                if (swapIndex < 0 || swapIndex >= files.length) return;
+                [files[index], files[swapIndex]] = [files[swapIndex], files[index]];
+                dt.items.clear();
+                files.forEach(file => dt.items.add(file));
+                render();
+            };
+
+            const removeAt = (index) => {
+                const files = [...dt.files];
+                files.splice(index, 1);
+                dt.items.clear();
+                files.forEach(file => dt.items.add(file));
+                render();
+            };
+
+            input.addEventListener("change", () => {
+                [...input.files].forEach(file => dt.items.add(file));
+                render();
+            });
+        })();
+    </script>
+}

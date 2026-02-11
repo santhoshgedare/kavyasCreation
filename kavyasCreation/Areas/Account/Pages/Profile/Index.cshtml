@@ -1,0 +1,265 @@
+@page
+@model kavyasCreation.Areas.Account.Pages.Profile.IndexModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">My Profile</h1>
+                    <p class="text-muted mb-0">Manage your personal information</p>
+                </div>
+                @if (Model.HasProfile)
+                {
+                    <span class="badge bg-success">
+                        <i class="bi bi-check-circle"></i> Profile Complete
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-exclamation-triangle"></i> Please Complete Your Profile
+                    </span>
+                }
+            </div>
+
+            <form method="post">
+                <div class="row g-4">
+                    <!-- Personal Information Card -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-person"></i> Personal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="Input.FirstName" class="form-label"></label>
+                                    <input asp-for="Input.FirstName" class="form-control" placeholder="John" />
+                                    <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Input.LastName" class="form-label"></label>
+                                    <input asp-for="Input.LastName" class="form-control" placeholder="Doe" />
+                                    <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Input.DateOfBirth" class="form-label"></label>
+                                    <input asp-for="Input.DateOfBirth" class="form-control" type="date" />
+                                    <span asp-validation-for="Input.DateOfBirth" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-0">
+                                    <label asp-for="Input.Gender" class="form-label"></label>
+                                    <select asp-for="Input.Gender" class="form-select">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <span asp-validation-for="Input.Gender" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Card -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-telephone"></i> Contact Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="Input.Email" class="form-label"></label>
+                                    <input asp-for="Input.Email" class="form-control" placeholder="john.doe@example.com" />
+                                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Input.AlternateEmail" class="form-label"></label>
+                                    <input asp-for="Input.AlternateEmail" class="form-control" placeholder="alternate@example.com" />
+                                    <span asp-validation-for="Input.AlternateEmail" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="+1 (555) 123-4567" />
+                                    <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-0">
+                                    <label asp-for="Input.AlternatePhoneNumber" class="form-label"></label>
+                                    <input asp-for="Input.AlternatePhoneNumber" class="form-control" placeholder="+1 (555) 987-6543" />
+                                    <span asp-validation-for="Input.AlternatePhoneNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optional First Address (Only for new profiles) -->
+                    @if (!Model.HasProfile && Model.AddressInput != null)
+                    {
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header bg-info bg-opacity-10">
+                                    <div class="form-check mb-0">
+                                        <input asp-for="AddressInput.AddAddress" class="form-check-input" id="addAddressCheck" />
+                                        <label asp-for="AddressInput.AddAddress" class="form-check-label fw-bold">
+                                            <i class="bi bi-geo-alt-fill"></i> Add My First Address (Optional)
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">You can also add addresses later from "Manage Addresses"</small>
+                                </div>
+                                <div class="card-body" id="addressFields" style="display: none;">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label asp-for="AddressInput.Label" class="form-label"></label>
+                                            <select asp-for="AddressInput.Label" class="form-select">
+                                                <option value="Home">Home</option>
+                                                <option value="Work">Work</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6"></div>
+                                        <div class="col-12">
+                                            <label asp-for="AddressInput.AddressLine1" class="form-label"></label>
+                                            <input asp-for="AddressInput.AddressLine1" class="form-control" placeholder="123 Main Street" />
+                                        </div>
+                                        <div class="col-12">
+                                            <label asp-for="AddressInput.AddressLine2" class="form-label"></label>
+                                            <input asp-for="AddressInput.AddressLine2" class="form-control" placeholder="Apt 4B (Optional)" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="AddressInput.City" class="form-label"></label>
+                                            <input asp-for="AddressInput.City" class="form-control" placeholder="New York" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="AddressInput.State" class="form-label"></label>
+                                            <input asp-for="AddressInput.State" class="form-control" placeholder="NY" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="AddressInput.PostalCode" class="form-label"></label>
+                                            <input asp-for="AddressInput.PostalCode" class="form-control" placeholder="10001" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="AddressInput.Country" class="form-label"></label>
+                                            <input asp-for="AddressInput.Country" class="form-control" value="USA" />
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3 mb-0">
+                                        <i class="bi bi-info-circle"></i> This will be set as your <strong>Primary</strong> and <strong>Default Shipping</strong> address.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Addresses Card (For existing profiles) -->
+                    @if (Model.HasProfile)
+                    {
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> My Addresses</h5>
+                                    <a asp-page="/Profile/Addresses" asp-area="Account" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-plus-circle"></i> Manage Addresses
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    @if (Model.Addresses.Any())
+                                    {
+                                        <div class="row g-3">
+                                            @foreach (var address in Model.Addresses.Take(3))
+                                            {
+                                                <div class="col-md-4">
+                                                    <div class="border rounded p-3 h-100">
+                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                            <strong class="text-primary">@address.Label</strong>
+                                                            <div>
+                                                                @if (address.IsPrimary)
+                                                                {
+                                                                    <span class="badge bg-primary" title="Primary Address">Primary</span>
+                                                                }
+                                                                @if (address.IsShippingDefault)
+                                                                {
+                                                                    <span class="badge bg-success" title="Default Shipping">Shipping</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            @address.AddressLine1<br/>
+                                                            @if (!string.IsNullOrWhiteSpace(address.AddressLine2))
+                                                            {
+                                                                @address.AddressLine2<br/>
+                                                            }
+                                                            @address.City, @address.State @address.PostalCode<br/>
+                                                            @address.Country
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        @if (Model.Addresses.Count > 3)
+                                        {
+                                            <div class="text-center mt-3">
+                                                <a asp-page="/Profile/Addresses" asp-area="Account" class="text-muted small">
+                                                    View all @Model.Addresses.Count addresses ?
+                                                </a>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="bi bi-geo-alt text-muted" style="font-size: 3rem;"></i>
+                                            <p class="text-muted mb-2">No addresses yet</p>
+                                            <a asp-page="/Profile/Addresses" asp-area="Account" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-plus-circle"></i> Add Your First Address
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Action Buttons -->
+                    <div class="col-12">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-area="Store" asp-page="/Catalog/Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="saveBtn">
+                                <i class="bi bi-check-circle"></i> Save Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Toggle address fields visibility
+        const addAddressCheck = document.getElementById('addAddressCheck');
+        const addressFields = document.getElementById('addressFields');
+        
+        if (addAddressCheck && addressFields) {
+            addAddressCheck.addEventListener('change', function() {
+                addressFields.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        // Save button loading
+        document.querySelector('form').addEventListener('submit', function() {
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+        });
+    </script>
+}
+
+

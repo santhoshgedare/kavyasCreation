@@ -1,0 +1,50 @@
+@page
+@model kavyasCreation.Areas.Store.Pages.Orders.IndexModel
+@{
+    ViewData["Title"] = "Orders";
+}
+<section class="bg-white rounded-3 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="display-6 mb-1">My Orders</h1>
+            <p class="text-muted mb-0">Track recent purchases and order details.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Catalog/Index" asp-area="Store">Shop More</a>
+    </div>
+
+    @if (!Model.Orders.Any())
+    {
+        <div class="alert alert-info">No orders yet.</div>
+    }
+    else
+    {
+        <div class="accordion" id="ordersAccordion">
+            @for (var i = 0; i < Model.Orders.Count; i++)
+            {
+                var order = Model.Orders[i];
+                <div class="accordion-item mb-2">
+                    <h2 class="accordion-header" id="heading-@order.Id">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@order.Id">
+                            <span class="me-3">Order @order.Id.ToString().Substring(0, 8)</span>
+                            <span class="text-muted">@order.CreatedAt.ToLocalTime().ToString("g")</span>
+                            <span class="ms-auto fw-bold">@order.Total.ToString("C")</span>
+                        </button>
+                    </h2>
+                    <div id="collapse-@order.Id" class="accordion-collapse collapse" data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var item in order.Items)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>@item.Name <small class="text-muted">x @item.Quantity</small></span>
+                                        <span>@(item.Price * item.Quantity).ToString("C")</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>

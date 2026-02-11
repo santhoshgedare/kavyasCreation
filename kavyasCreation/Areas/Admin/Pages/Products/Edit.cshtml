@@ -1,0 +1,294 @@
+@page "{id:guid}"
+@model kavyasCreation.Areas.Admin.Pages.Products.EditModel
+@{
+    ViewData["Title"] = "Edit Product";
+}
+<section class="bg-white rounded-3 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="display-6 mb-1">Edit Product</h1>
+            <p class="text-muted mb-0">Update product details and inventory.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Products/Index" asp-area="Admin">Back</a>
+    </div>
+    <form method="post" class="mt-3" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="Product.Id" />
+        <input type="hidden" asp-for="ImageOrder" />
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input class="form-control" asp-for="Product.Name" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" asp-for="Product.CategoryId">
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id" selected="@(Model.Product.CategoryId == category.Id)">@category.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" asp-for="Product.Description" rows="3"></textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Price</label>
+                <input class="form-control" asp-for="Product.Price" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Stock</label>
+                <input class="form-control" asp-for="Product.Stock" />
+                <div class="form-text">Reserved: @Model.Product.ReservedStock | Available: @Model.Product.AvailableStock</div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Images</label>
+                <input id="imageUploadsEdit" class="form-control" type="file" asp-for="ImageUploads" accept="image/*" multiple />
+                <div class="form-text">Upload new images to add to the gallery.</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Reorder Level</label>
+                <input class="form-control" asp-for="Product.ReorderLevel" type="number" />
+                <div class="form-text">Alert when stock reaches this level</div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Reorder Quantity</label>
+                <input class="form-control" asp-for="Product.ReorderQuantity" type="number" />
+                <div class="form-text">Suggested reorder amount</div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" asp-for="Product.IsFeatured" type="checkbox" />
+                    <label class="form-check-label" asp-for="Product.IsFeatured">
+                        Featured Product
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Image Gallery (drag to reorder)</label>
+            <div id="imageGalleryEdit" class="d-flex flex-wrap gap-2"></div>
+            <div class="form-text">Drag existing and new images to set the order before saving.</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Add Specification</label>
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input class="form-control" asp-for="SpecKey" placeholder="Key" />
+                </div>
+                <div class="col-md-5">
+                    <input class="form-control" asp-for="SpecValue" placeholder="Value" />
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-outline-primary" type="submit" formaction="?handler=AddSpecification&id=@Model.Product.Id">Add</button>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Specifications</label>
+            <div class="d-flex flex-column gap-2">
+                @if (Model.Product.Specifications.Any())
+                {
+                    @foreach (var spec in Model.Product.Specifications)
+                    {
+                        <div class="d-flex align-items-center justify-content-between border rounded p-2">
+                            <div>
+                                <strong>@spec.Key:</strong> @spec.Value
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm"
+                                    type="submit"
+                                    name="specId"
+                                    value="@spec.Id"
+                                    formaction="?handler=RemoveSpecification&id=@Model.Product.Id"
+                                    formmethod="post">Remove</button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-muted">No specifications added yet.</div>
+                }
+            </div>
+        </div>
+        <div class="d-none">
+            @if (Model.Product.Images.Any())
+            {
+                @foreach (var image in Model.Product.Images)
+                {
+                    <div class="image-template" data-image-id="@image.Id" data-url="@image.Url"></div>
+                }
+            }
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" type="submit">Save</button>
+            <a class="btn btn-outline-secondary" asp-page="/Products/Index" asp-area="Admin">Cancel</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const input = document.getElementById("imageUploadsEdit");
+            const gallery = document.getElementById("imageGalleryEdit");
+            const orderInput = document.querySelector("input[name='ImageOrder']");
+            if (!input || !gallery || !orderInput) return;
+
+            const dt = new DataTransfer();
+            const uploadMap = new Map();
+
+            const createItem = (opts) => {
+                const item = document.createElement("div");
+                item.className = "border rounded p-2 text-center image-item";
+                item.style.width = "160px";
+                item.draggable = true;
+                item.dataset.type = opts.type;
+                if (opts.imageId) item.dataset.imageId = opts.imageId;
+                if (opts.uploadId) item.dataset.uploadId = opts.uploadId;
+
+                const img = document.createElement("img");
+                img.src = opts.url;
+                img.className = "img-fluid rounded mb-2";
+                img.style.height = "90px";
+                img.style.objectFit = "cover";
+                img.style.width = "100%";
+
+                const actions = document.createElement("div");
+                actions.className = "d-flex justify-content-center gap-1 mb-2";
+
+                const up = document.createElement("button");
+                up.type = "button";
+                up.className = "btn btn-outline-secondary btn-sm move-up";
+                up.textContent = "Up";
+
+                const down = document.createElement("button");
+                down.type = "button";
+                down.className = "btn btn-outline-secondary btn-sm move-down";
+                down.textContent = "Down";
+
+                actions.appendChild(up);
+                actions.appendChild(down);
+
+                item.appendChild(img);
+                item.appendChild(actions);
+
+                if (opts.type === "existing") {
+                    const remove = document.createElement("button");
+                    remove.className = "btn btn-outline-danger btn-sm";
+                    remove.type = "submit";
+                    remove.name = "imageId";
+                    remove.value = opts.imageId;
+                    remove.setAttribute("formaction", `?handler=DeleteImage&id=${opts.productId}`);
+                    remove.setAttribute("formmethod", "post");
+                    remove.textContent = "Remove";
+                    item.appendChild(remove);
+                } else {
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = "btn btn-outline-danger btn-sm";
+                    remove.textContent = "Remove";
+                    remove.addEventListener("click", () => {
+                        uploadMap.delete(opts.uploadId);
+                        item.remove();
+                        updateOrder();
+                    });
+                    item.appendChild(remove);
+                }
+
+                return item;
+            };
+
+            const updateOrder = () => {
+                const tokens = [];
+                const newFiles = [];
+
+                gallery.querySelectorAll(".image-item").forEach(item => {
+                    if (item.dataset.type === "existing") {
+                        tokens.push(`e:${item.dataset.imageId}`);
+                    } else {
+                        tokens.push("n");
+                        const file = uploadMap.get(item.dataset.uploadId);
+                        if (file) newFiles.push(file);
+                    }
+                });
+
+                orderInput.value = tokens.join(",");
+                dt.items.clear();
+                newFiles.forEach(file => dt.items.add(file));
+                input.files = dt.files;
+            };
+
+            const initializeExisting = () => {
+                document.querySelectorAll(".image-template").forEach(template => {
+                    const item = createItem({
+                        type: "existing",
+                        imageId: template.dataset.imageId,
+                        url: template.dataset.url,
+                        productId: "@Model.Product.Id"
+                    });
+                    gallery.appendChild(item);
+                });
+                updateOrder();
+            };
+
+            input.addEventListener("change", () => {
+                [...input.files].forEach(file => {
+                    const uploadId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+                    uploadMap.set(uploadId, file);
+                    const item = createItem({
+                        type: "new",
+                        uploadId,
+                        url: URL.createObjectURL(file)
+                    });
+                    gallery.appendChild(item);
+                });
+                updateOrder();
+            });
+
+            let dragSource = null;
+            gallery.addEventListener("dragstart", event => {
+                const target = event.target;
+                if (target instanceof HTMLElement) {
+                    dragSource = target.closest(".image-item");
+                }
+            });
+            gallery.addEventListener("dragover", event => event.preventDefault());
+            gallery.addEventListener("drop", event => {
+                event.preventDefault();
+                const target = event.target instanceof HTMLElement ? event.target.closest(".image-item") : null;
+                if (dragSource && target && dragSource !== target) {
+                    gallery.insertBefore(dragSource, target);
+                    updateOrder();
+                }
+                dragSource = null;
+            });
+
+            gallery.addEventListener("click", event => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) return;
+                const item = target.closest(".image-item");
+                if (!item) return;
+
+                if (target.classList.contains("move-up")) {
+                    const prev = item.previousElementSibling;
+                    if (prev) {
+                        gallery.insertBefore(item, prev);
+                        updateOrder();
+                    }
+                }
+                if (target.classList.contains("move-down")) {
+                    const next = item.nextElementSibling;
+                    if (next) {
+                        gallery.insertBefore(next, item);
+                        updateOrder();
+                    }
+                }
+            });
+
+            initializeExisting();
+        })();
+    </script>
+}

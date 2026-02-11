@@ -1,0 +1,53 @@
+@page
+@model kavyasCreation.Areas.Store.Pages.Checkout.IndexModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+<section class="bg-white rounded-3 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="display-6 mb-1">Checkout</h1>
+            <p class="text-muted mb-0">Review your order before payment.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Cart/Index" asp-area="Store">Back to Cart</a>
+    </div>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="alert alert-info">Your cart is empty.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Order Summary</h5>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.Items)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@item.Name <small class="text-muted">x @item.Quantity</small></span>
+                                    <span>@(item.Price * item.Quantity).ToString("C")</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-semibold">Total</span>
+                            <span class="fw-bold">@Model.Total.ToString("C")</span>
+                        </div>
+                        <form method="post">
+                            <button class="btn btn-success w-100" type="submit">Continue to Payment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</section>

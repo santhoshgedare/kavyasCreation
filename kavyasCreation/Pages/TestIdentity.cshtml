@@ -1,0 +1,104 @@
+@page
+@{
+    ViewData["Title"] = "Test Identity Pages";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Identity Pages Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="mb-4">? Identity Pages Status</h1>
+        
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Authentication Status</h5>
+            </div>
+            <div class="card-body">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> <strong>Logged In</strong> as @User.Identity.Name
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Not Logged In</strong>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Test Links</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="/Identity/Account/Register" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person-plus"></i> <strong>Register Page</strong>
+                        <br><small class="text-muted">/Identity/Account/Register</small>
+                    </a>
+                    
+                    <a href="/Identity/Account/Login" class="list-group-item list-group-item-action">
+                        <i class="bi bi-box-arrow-in-right"></i> <strong>Login Page</strong>
+                        <br><small class="text-muted">/Identity/Account/Login</small>
+                    </a>
+                    
+                    <a href="/Identity/Account/Manage" class="list-group-item list-group-item-action">
+                        <i class="bi bi-gear"></i> <strong>Manage Page</strong> (Requires Login)
+                        <br><small class="text-muted">/Identity/Account/Manage</small>
+                    </a>
+                    
+                    <a href="/Account/Profile" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> <strong>Full Profile Page</strong> (Requires Login)
+                        <br><small class="text-muted">/Account/Profile</small>
+                    </a>
+                    
+                    <a href="/Account/Profile/Addresses" class="list-group-item list-group-item-action">
+                        <i class="bi bi-geo-alt"></i> <strong>Manage Addresses</strong> (Requires Login)
+                        <br><small class="text-muted">/Account/Profile/Addresses</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Files Exist</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li>? Areas/Identity/Pages/Account/Register.cshtml</li>
+                    <li>? Areas/Identity/Pages/Account/Login.cshtml</li>
+                    <li>? Areas/Identity/Pages/Account/Manage/Index.cshtml</li>
+                    <li>? Areas/Account/Pages/Profile/Index.cshtml</li>
+                    <li>? Areas/Account/Pages/Profile/Addresses.cshtml</li>
+                    <li>? Views/Shared/_AuthLayout.cshtml</li>
+                    <li>? Views/Shared/_Layout.cshtml</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <h5><i class="bi bi-info-circle"></i> Instructions:</h5>
+            <ol>
+                <li>Click each link above to test</li>
+                <li>Register page should work without login</li>
+                <li>Login page should work without login</li>
+                <li>Manage & Profile pages require login first</li>
+                <li>If any link gives 404, check the troubleshooting guide</li>
+            </ol>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Go to Homepage</a>
+        </div>
+    </div>
+</body>
+</html>

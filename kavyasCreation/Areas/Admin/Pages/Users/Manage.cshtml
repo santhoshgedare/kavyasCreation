@@ -1,0 +1,206 @@
+@page
+@model kavyasCreation.Areas.Admin.Pages.Users.ManageModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<section class="bg-white rounded-3 shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6 mb-1">
+                <i class="bi bi-people-fill text-primary"></i> User Management
+            </h1>
+            <p class="text-muted mb-0">Manage users, roles, and permissions</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-page="/Users/Index" asp-area="Admin">
+                <i class="bi bi-person-badge"></i> User Profiles
+            </a>
+            <span class="badge bg-primary fs-5">
+                <i class="bi bi-person"></i> @Model.Users.Count Total Users
+            </span>
+        </div>
+    </div>
+
+    <!-- Assign Role Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="bi bi-shield-check"></i> Assign Role
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="AssignRole">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Select User</label>
+                        <select asp-for="SelectedUserId" class="form-select">
+                            <option value="">Choose user...</option>
+                            @foreach (var user in Model.Users)
+                            {
+                                <option value="@user.UserId">@user.Email (@user.FullName)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Select Role</label>
+                        <select asp-for="SelectedRole" class="form-select">
+                            <option value="">Choose role...</option>
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <option value="@role.Name">@role.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Assign
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Roles</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
+                    
+                    <tr class="@(isLocked ? "table-danger" : "")">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-person-fill text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">
+                                        @if (!string.IsNullOrWhiteSpace(user.FullName))
+                                        {
+                                            @user.FullName
+                                        }
+                                        else
+                                        {
+                                            @user.UserName
+                                        }
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-envelope"></i> @user.Email
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
+                            {
+                                <div>
+                                    <i class="bi bi-phone"></i> @user.PhoneNumber
+                                </div>
+                            }
+                            @if (user.AddressCount > 0)
+                            {
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i> @user.AddressCount @(user.AddressCount == 1 ? "address" : "addresses")
+                                </small>
+                            }
+                        </td>
+                        <td>
+                            @if (user.Roles.Any())
+                            {
+                                foreach (var role in user.Roles)
+                                {
+                                    <form method="post" asp-page-handler="RemoveRole" class="d-inline" 
+                                          onsubmit="return confirm('Remove @role role from @user.Email?');">
+                                        <input type="hidden" name="userId" value="@user.UserId" />
+                                        <input type="hidden" name="role" value="@role" />
+                                        <span class="badge bg-info me-1">
+                                            @role
+                                            <button type="submit" class="btn-close btn-close-white btn-sm ms-1" 
+                                                    style="font-size: 0.6rem;" title="Remove role"></button>
+                                        </span>
+                                    </form>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">No roles</span>
+                            }
+                        </td>
+                        <td>
+                            @if (isLocked)
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-lock-fill"></i> Locked
+                                </span>
+                            }
+                            else if (!user.EmailConfirmed)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-exclamation-triangle"></i> Unconfirmed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Active
+                                </span>
+                            }
+                            @if (user.AccessFailedCount > 0)
+                            {
+                                <br/>
+                                <small class="text-danger">
+                                    Failed logins: @user.AccessFailedCount
+                                </small>
+                            }
+                        </td>
+                        <td>
+                            @if (user.CreatedAt.HasValue)
+                            {
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i> @user.CreatedAt.Value.ToString("MMM dd, yyyy")
+                                </small>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                @if (isLocked)
+                                {
+                                    <form method="post" asp-page-handler="UnlockUser" class="d-inline">
+                                        <input type="hidden" name="userId" value="@user.UserId" />
+                                        <button type="submit" class="btn btn-success" title="Unlock User"
+                                                onclick="return confirm('Unlock @user.Email?');">
+                                            <i class="bi bi-unlock"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="LockUser" class="d-inline">
+                                        <input type="hidden" name="userId" value="@user.UserId" />
+                                        <button type="submit" class="btn btn-danger" title="Lock User"
+                                                onclick="return confirm('Lock @user.Email?');">
+                                            <i class="bi bi-lock"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
