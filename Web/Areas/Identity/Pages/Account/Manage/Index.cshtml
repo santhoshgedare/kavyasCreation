@@ -1,0 +1,53 @@
+@page
+@model Web.Areas.Identity.Pages.Account.Manage.IndexModel
+@{
+    ViewData["Title"] = "Account Settings";
+    Layout = "_AuthLayout";
+}
+
+<div class="card shadow-lg" style="max-width: 500px; margin: 0 auto;">
+    <div class="card-body p-5">
+        <div class="text-center mb-4">
+            <h1 class="h3 fw-bold">Account Settings</h1>
+            <p class="text-muted">Manage your login credentials</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> @Model.StatusMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="mb-4">
+            <label for="username" class="form-label fw-semibold">
+                <i class="bi bi-person"></i> Username
+            </label>
+            <input type="text" id="username" class="form-control form-control-lg" value="@Model.Input.UserName" disabled />
+            <small class="text-muted">This is your login username (cannot be changed)</small>
+        </div>
+
+        <div class="d-grid gap-2">
+            <a asp-page="./ChangePassword" class="btn btn-primary btn-lg">
+                <i class="bi bi-key"></i> Change Password
+            </a>
+            
+            <a asp-area="Account" asp-page="/Profile/Index" class="btn btn-outline-secondary">
+                <i class="bi bi-person-badge"></i> Go to Full Profile
+            </a>
+        </div>
+
+        <div class="border-top pt-3 mt-4">
+            <small class="text-muted d-block text-center">
+                Need to update personal info? Visit your <a asp-area="Account" asp-page="/Profile/Index" class="fw-semibold">Full Profile</a>
+            </small>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

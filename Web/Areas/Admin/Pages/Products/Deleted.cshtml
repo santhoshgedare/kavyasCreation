@@ -1,0 +1,58 @@
+@page
+@model Web.Areas.Admin.Pages.Products.DeletedModel
+@{
+    ViewData["Title"] = "Deleted Products";
+}
+<section class="bg-white rounded-3 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="display-6 mb-1">Deleted Products</h1>
+            <p class="text-muted mb-0">Restore products removed from the catalog.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Products/Index" asp-area="Admin">Back to Products</a>
+    </div>
+
+    @if (!Model.Products.Any())
+    {
+        <div class="alert alert-info">No deleted products.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end">Stock</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model.Products)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@(product.Images.FirstOrDefault()?.Url ?? "/uploads/products/placeholder.svg")" alt="@product.Name" class="rounded" style="width:64px;height:64px;object-fit:cover;" />
+                                    <div class="ms-3">
+                                        <div class="fw-semibold">@product.Name</div>
+                                        <div class="text-muted">@product.Description</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-end">@product.Price.ToString("C")</td>
+                            <td class="text-end">@product.Stock</td>
+                            <td class="text-end">
+                                <form method="post" asp-page-handler="Restore">
+                                    <input type="hidden" name="id" value="@product.Id" />
+                                    <button class="btn btn-outline-success btn-sm" type="submit">Restore</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

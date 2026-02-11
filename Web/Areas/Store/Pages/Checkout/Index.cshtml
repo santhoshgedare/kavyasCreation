@@ -1,0 +1,78 @@
+@page
+@model Web.Areas.Store.Pages.Checkout.IndexModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light rounded-3 p-3 shadow-sm">
+        <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+        <li class="breadcrumb-item"><a asp-area="Store" asp-page="/Catalog/Index">Catalog</a></li>
+        <li class="breadcrumb-item"><a asp-area="Store" asp-page="/Cart/Index">Cart</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+    </ol>
+</nav>
+
+<section class="bg-white rounded-3 shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 mb-1">
+                <i class="bi bi-credit-card text-primary"></i> Secure Checkout
+            </h1>
+            <p class="text-muted mb-0">Complete your order securely</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Cart/Index" asp-area="Store">
+            <i class="bi bi-arrow-left"></i> Back to Cart
+        </a>
+    </div>
+</section>
+
+@if (!Model.Items.Any())
+{
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-cart-x display-1 text-muted"></i>
+        </div>
+        <h3 class="text-muted mb-3">Your cart is empty</h3>
+        <p class="text-muted mb-4">Add items to your cart before checking out.</p>
+        <a class="btn btn-primary btn-lg" asp-page="/Catalog/Index" asp-area="Store">
+            <i class="bi bi-shop"></i> Browse Products
+        </a>
+    </div>
+}
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Order Summary</h5>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.Items)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@item.Name <small class="text-muted">x @item.Quantity</small></span>
+                                    <span>@(item.Price * item.Quantity).ToString("C")</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-semibold">Total</span>
+                            <span class="fw-bold">@Model.Total.ToString("C")</span>
+                        </div>
+                        <form method="post">
+                            <button class="btn btn-success w-100" type="submit">Continue to Payment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</section>

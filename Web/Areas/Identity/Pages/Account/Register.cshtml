@@ -1,0 +1,98 @@
+@page
+@model Web.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_AuthLayout";
+}
+
+<div class="card shadow-lg" style="max-width: 450px; margin: 0 auto;">
+    <div class="card-body p-5">
+        <div class="text-center mb-4">
+            <h1 class="h3 fw-bold">Create Account</h1>
+            <p class="text-muted">Join Kavya's Creations</p>
+        </div>
+
+        <form id="registerForm" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label"></label>
+                <input asp-for="Input.Email" class="form-control form-control-lg" placeholder="your@email.com" autocomplete="email" autofocus />
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label"></label>
+                <input asp-for="Input.Password" class="form-control form-control-lg" placeholder="••••••••" autocomplete="new-password" type="password" />
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                <input asp-for="Input.ConfirmPassword" class="form-control form-control-lg" placeholder="••••••••" autocomplete="new-password" type="password" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                Create Account
+            </button>
+
+            <div class="text-center mb-4">
+                <p class="mb-0 text-muted small">
+                    Already have an account? 
+                    <a asp-area="Identity" asp-page="/Account/Login" class="text-decoration-none fw-semibold">Sign in</a>
+                </p>
+            </div>
+
+            <!-- Divider -->
+            <div class="position-relative my-4">
+                <hr class="text-muted" />
+                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">OR</span>
+            </div>
+
+            <!-- External Login Providers -->
+            @if (Model.ExternalLogins?.Count > 0)
+            {
+                <div class="d-grid gap-2">
+                    @foreach (var provider in Model.ExternalLogins)
+                    {
+                        var buttonClass = "btn-outline-secondary";
+                        var icon = "bi-box-arrow-in-right";
+                        
+                        if (provider.Name == "Google")
+                        {
+                            buttonClass = "btn-outline-danger";
+                            icon = "bi-google";
+                        }
+                        else if (provider.Name == "Facebook")
+                        {
+                            buttonClass = "btn-outline-primary";
+                            icon = "bi-facebook";
+                        }
+                        
+                        <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <input type="hidden" name="provider" value="@provider.Name" />
+                            <button type="submit" class="btn @buttonClass w-100" name="provider" value="@provider.Name">
+                                <i class="bi @icon me-2"></i> Sign up with @provider.DisplayName
+                            </button>
+                        </form>
+                    }
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function() {
+            const btn = document.getElementById('registerSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account...';
+        });
+    </script>
+}
+
+
+
