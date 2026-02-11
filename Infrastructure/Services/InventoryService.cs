@@ -6,6 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services
 {
+    /// <summary>
+    /// Service for managing product inventory, stock reservations, and stock movements.
+    /// Provides thread-safe operations with optimistic concurrency control.
+    /// </summary>
     public class InventoryService : IInventoryService
     {
         private readonly AppDbContext _db;
@@ -17,12 +21,27 @@ namespace Infrastructure.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// Checks if sufficient stock is available for a product.
+        /// </summary>
+        /// <param name="productId">The product identifier.</param>
+        /// <param name="quantity">The quantity to check.</param>
+        /// <returns>True if sufficient stock is available, false otherwise.</returns>
         public async Task<bool> CheckAvailabilityAsync(Guid productId, int quantity)
         {
             var product = await _db.Products.FindAsync(productId);
             return product is not null && product.AvailableStock >= quantity;
         }
 
+        /// <summary>
+        /// Reserves stock for a user with an expiration time.
+        /// Creates a stock reservation and records the movement in stock history.
+        /// </summary>
+        /// <param name="productId">The product identifier.</param>
+        /// <param name="userId">The user identifier reserving the stock.</param>
+        /// <param name="quantity">The quantity to reserve.</param>
+        /// <param name="expirationMinutes">The expiration time in minutes (default: 15).</param>
+        /// <returns>The created stock reservation, or null if insufficient stock or concurrency conflict.</returns>
         public async Task<StockReservation?> ReserveStockAsync(Guid productId, string userId, int quantity, int expirationMinutes = 15)
         {
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -77,6 +96,13 @@ namespace Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Commits a stock reservation to an order, deducting the stock permanently.
+        /// Updates both reserved and total stock levels.
+        /// </summary>
+        /// <param name="reservationId">The reservation identifier to commit.</param>
+        /// <param name="orderId">The order identifier for this commitment.</param>
+        /// <returns>True if successfully committed, false otherwise.</returns>
         public async Task<bool> CommitReservationAsync(Guid reservationId, Guid orderId)
         {
             using var transaction = await _db.Database.BeginTransactionAsync();

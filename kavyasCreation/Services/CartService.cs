@@ -2,6 +2,10 @@ using Core.Entities;
 
 namespace kavyasCreation.Services
 {
+    /// <summary>
+    /// Service for managing shopping cart operations stored in session.
+    /// Cart data is persisted in the HTTP session and is not database-backed.
+    /// </summary>
     public class CartService
     {
         private const string CartKey = "cart";
@@ -14,11 +18,20 @@ namespace kavyasCreation.Services
 
         private ISession Session => _httpContextAccessor.HttpContext!.Session;
 
+        /// <summary>
+        /// Gets all items currently in the shopping cart.
+        /// </summary>
+        /// <returns>A list of cart items, or an empty list if cart is empty.</returns>
         public List<CartItem> GetItems()
         {
             return Session.GetObject<List<CartItem>>(CartKey) ?? [];
         }
 
+        /// <summary>
+        /// Adds a product to the cart or updates quantity if it already exists.
+        /// </summary>
+        /// <param name="product">The product to add.</param>
+        /// <param name="quantity">The quantity to add (default: 1).</param>
         public void AddItem(Product product, int quantity = 1)
         {
             var items = GetItems();

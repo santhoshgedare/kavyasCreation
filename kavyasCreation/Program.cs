@@ -6,7 +6,9 @@ using kavyasCreation.Data;
 using kavyasCreation.Middleware;
 using kavyasCreation.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,6 +112,56 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>("identity-db")
     .AddDbContextCheck<AppDbContext>("app-db");
 
+// Add rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User?.Identity?.Name ?? context.Request.Headers.Host.ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = builder.Configuration.GetValue<int>("RateLimiting:PermitLimit", 100),
+                Window = TimeSpan.FromSeconds(builder.Configuration.GetValue<int>("RateLimiting:WindowSeconds", 60)),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = builder.Configuration.GetValue<int>("RateLimiting:QueueLimit", 10)
+            }));
+    
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "Too many requests. Please try again later.",
+            retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter) ? retryAfter.ToString() : null
+        }, cancellationToken);
+    };
+});
+
+// Add CORS
+var corsOrigins = builder.Configuration["Cors:AllowedOrigins"] ?? "*";
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        if (corsOrigins == "*")
+        {
+            policy.AllowAnyOrigin();
+        }
+        else
+        {
+            policy.WithOrigins(corsOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries));
+        }
+        
+        policy.AllowAnyMethod()
+              .AllowAnyHeader();
+        
+        if (builder.Configuration.GetValue<bool>("Cors:AllowCredentials", false))
+        {
+            policy.AllowCredentials();
+        }
+    });
+});
+
 var app = builder.Build();
 
 // Add global exception handler middleware
@@ -141,6 +193,9 @@ app.UseResponseCompression();
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseCors();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
