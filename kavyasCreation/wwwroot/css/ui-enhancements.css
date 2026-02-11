@@ -219,3 +219,61 @@ html[data-bs-theme="dark"] .modal-content {
     background-color: #1e293b;
     border-color: #334155;
 }
+
+/* ========================================
+   BREADCRUMB ENHANCEMENTS
+   ======================================== */
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    font-size: 1.2em;
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #0d6efd;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* ========================================
+   SMOOTH TRANSITIONS
+   ======================================== */
+a, button, .btn, .card, .badge {
+    transition: all 0.2s ease-in-out;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   SOCIAL MEDIA LINKS
+   ======================================== */
+footer a[href*="facebook"],
+footer a[href*="instagram"],
+footer a[href*="twitter"],
+footer a[href*="pinterest"] {
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    transform: translateY(-2px);
+    color: #0d6efd !important;
+}
+

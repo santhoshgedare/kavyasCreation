@@ -93,15 +93,68 @@
         </main>
     </div>
 
-    <footer class="border-top bg-light py-3 mt-auto">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div class="text-muted">&copy; 2026 - kavyasCreation</div>
-            <div>
-                <a class="text-muted text-decoration-none me-3" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                <a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Catalog/Index">Shop</a>
+    <footer class="border-top bg-light py-4 mt-auto">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h5 class="fw-bold mb-3">Kavya's Creations</h5>
+                    <p class="text-muted">Handcrafted excellence in bangles, sarees, and blouses. Each piece made with love and tradition.</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-muted" title="Facebook">
+                            <i class="bi bi-facebook fs-4"></i>
+                        </a>
+                        <a href="#" class="text-muted" title="Instagram">
+                            <i class="bi bi-instagram fs-4"></i>
+                        </a>
+                        <a href="#" class="text-muted" title="Twitter">
+                            <i class="bi bi-twitter fs-4"></i>
+                        </a>
+                        <a href="#" class="text-muted" title="Pinterest">
+                            <i class="bi bi-pinterest fs-4"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="fw-semibold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Catalog/Index">Shop</a></li>
+                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Cart/Index">Cart</a></li>
+                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Orders/Index">Orders</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-semibold mb-3">Customer Service</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a class="text-muted text-decoration-none" href="#">Contact Us</a></li>
+                        <li class="mb-2"><a class="text-muted text-decoration-none" href="#">Shipping Info</a></li>
+                        <li class="mb-2"><a class="text-muted text-decoration-none" href="#">Returns</a></li>
+                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-semibold mb-3">Contact Info</h6>
+                    <ul class="list-unstyled text-muted">
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i> support@kavyascreations.com</li>
+                        <li class="mb-2"><i class="bi bi-phone me-2"></i> +1 (555) 123-4567</li>
+                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i> Made with love, shipped worldwide</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="text-muted">&copy; 2026 Kavya's Creations. All rights reserved.</div>
+                <div class="mt-3 mt-md-0">
+                    <img src="~/images/payment-methods.svg" alt="Payment Methods" style="height: 30px;" onerror="this.style.display='none'">
+                </div>
             </div>
         </div>
     </footer>
+    
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle shadow-lg" style="width: 50px; height: 50px; display: none; z-index: 1000;" title="Back to top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
     
     <!-- TempData Messages -->
     @if (TempData["SuccessMessage"] != null)
