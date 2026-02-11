@@ -1,0 +1,127 @@
+@page
+@model Web.Areas.Admin.Pages.Inventory.StockMovementsModel
+@{
+    ViewData["Title"] = Model.Product != null ? $"Stock History - {Model.Product.Name}" : "Stock Movements";
+}
+
+<section class="bg-white rounded-3 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="display-6 mb-1">Stock Movement History</h1>
+            @if (Model.Product != null)
+            {
+                <p class="text-muted mb-0">@Model.Product.Name - Complete audit trail</p>
+            }
+            else
+            {
+                <p class="text-muted mb-0">View stock movement history</p>
+            }
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/Inventory/Dashboard" asp-area="Admin">Back</a>
+    </div>
+
+    @if (Model.Product != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="text-muted small">Current Stock</div>
+                                    <div class="h4 mb-0">@Model.Product.Stock</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="text-muted small">Reserved</div>
+                                    <div class="h4 mb-0 text-warning">@Model.Product.ReservedStock</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="text-muted small">Available</div>
+                                    <div class="h4 mb-0 text-success">@Model.Product.AvailableStock</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="text-muted small">Reorder Level</div>
+                                    <div class="h4 mb-0">@Model.Product.ReorderLevel</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (Model.Movements.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Stock Before</th>
+                        <th>Stock After</th>
+                        <th>Performed By</th>
+                        <th>Reference</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var movement in Model.Movements)
+                    {
+                        <tr>
+                            <td>@movement.CreatedAt.ToString("g")</td>
+                            <td>
+                                <span class="badge @(movement.MovementType switch {
+                                    "Sale" => "bg-danger",
+                                    "Purchase" => "bg-success",
+                                    "Return" => "bg-info",
+                                    "Reservation" => "bg-warning",
+                                    "Release" => "bg-secondary",
+                                    _ => "bg-primary"
+                                })">@movement.MovementType</span>
+                            </td>
+                            <td class="@(movement.Quantity > 0 ? "text-success" : "text-danger")">
+                                @(movement.Quantity > 0 ? "+" : "")@movement.Quantity
+                            </td>
+                            <td>@movement.StockBefore</td>
+                            <td><strong>@movement.StockAfter</strong></td>
+                            <td>@movement.PerformedBy</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(movement.ReferenceId))
+                                {
+                                    <code class="small">@movement.ReferenceId.Substring(0, Math.Min(8, movement.ReferenceId.Length))</code>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(movement.Notes))
+                                {
+                                    <small class="text-muted">@movement.Notes</small>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-circle me-2" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z"/>
+                <circle cx="8" cy="4.5" r="1"/>
+            </svg>
+            No stock movements recorded yet for this product.
+        </div>
+    }
+</section>

@@ -1,0 +1,119 @@
+@page "{id:guid}"
+@model Web.Areas.Store.Pages.Catalog.DetailsModel
+@{
+    ViewData["Title"] = Model.Product?.Name ?? "Product";
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const zoomContainers = document.querySelectorAll("[data-zoom]");
+            zoomContainers.forEach(container => {
+                const img = container.querySelector(".product-zoom-image");
+                if (!img) return;
+
+                container.addEventListener("mousemove", (event) => {
+                    const rect = container.getBoundingClientRect();
+                    const x = ((event.clientX - rect.left) / rect.width) * 100;
+                    const y = ((event.clientY - rect.top) / rect.height) * 100;
+                    img.style.transformOrigin = `${x}% ${y}%`;
+                });
+
+                container.addEventListener("mouseenter", () => {
+                    img.classList.add("zoomed");
+                });
+
+                container.addEventListener("mouseleave", () => {
+                    img.classList.remove("zoomed");
+                    img.style.transformOrigin = "center center";
+                });
+            });
+        })();
+    </script>
+}
+@if (Model.Product is null)
+{
+    <div class="alert alert-warning">Product not found.</div>
+}
+else
+{
+    <section class="bg-white rounded-3 shadow-sm p-4">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div id="productCarousel" class="carousel slide shadow-sm product-carousel" data-bs-ride="carousel">
+                    <div class="carousel-inner rounded product-carousel-inner">
+                        @{
+                            var images = Model.Product.Images.Any()
+                                ? Model.Product.Images
+                                : new List<Core.Entities.ProductImage> { new() { Url = "/uploads/products/placeholder.svg" } };
+                            var first = true;
+                        }
+                        @foreach (var image in images)
+                        {
+                            <div class="carousel-item @(first ? "active" : "")">
+                                <div class="product-zoom" data-zoom>
+                                    <img src="@image.Url" class="d-block w-100 product-carousel-img product-zoom-image" alt="@Model.Product.Name" />
+                                </div>
+                            </div>
+                            first = false;
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+
+                @if (Model.Product.Images.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        @for (var i = 0; i < Model.Product.Images.Count; i++)
+                        {
+                            var image = Model.Product.Images[i];
+                            <button class="border rounded p-1 bg-white product-thumb" type="button" data-bs-target="#productCarousel" data-bs-slide-to="@i" aria-label="Slide @(i + 1)">
+                                <img src="@image.Url" class="rounded product-thumb-img" alt="@Model.Product.Name" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="display-6 mb-1">@Model.Product.Name</h1>
+                        <div class="text-muted">@Model.Product.Category?.Name</div>
+                    </div>
+                    <span class="badge bg-success">In stock</span>
+                </div>
+                <p class="text-muted mt-3">@Model.Product.Description</p>
+                <h3 class="fw-bold">@Model.Product.Price.ToString("C")</h3>
+
+                <form method="post" asp-page-handler="Add" class="mt-3">
+                    <input type="hidden" name="productId" value="@Model.Product.Id" />
+                    <button class="btn btn-primary" type="submit">Add to Cart</button>
+                    <a class="btn btn-outline-secondary" asp-page="/Catalog/Index" asp-area="Store">Back</a>
+                </form>
+
+                @if (Model.Product.Specifications.Any())
+                {
+                    <div class="mt-4">
+                        <h5>Specifications</h5>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var spec in Model.Product.Specifications)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>@spec.Key</span>
+                                    <span class="text-muted">@spec.Value</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
