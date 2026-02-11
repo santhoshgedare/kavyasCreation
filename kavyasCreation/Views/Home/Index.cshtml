@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="col-lg-6 text-center mt-4 mt-lg-0">
-                <img class="img-fluid rounded shadow-lg" src="~/images/hero-image.jpg" alt="Handcrafted Products" style="max-height: 400px; object-fit: cover;" />
+                <img class="img-fluid rounded shadow-lg" src="~/images/hero-craft.svg" alt="Handcrafted Products" style="max-height: 400px; object-fit: contain;" />
             </div>
         </div>
     </div>
@@ -95,6 +95,63 @@
     </section>
 }
 
+<!-- Product Categories -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-semibold">Shop by Category</h2>
+            <p class="text-muted">Explore our beautiful collection of handcrafted items</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+                    <div class="category-overlay position-relative">
+                        <div class="category-bg" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); height: 200px;"></div>
+                        <div class="category-content position-absolute top-50 start-50 translate-middle text-center text-white w-100">
+                            <i class="bi bi-circle display-1 mb-3"></i>
+                            <h4 class="fw-bold">Bangles</h4>
+                            <p class="mb-0">Traditional & Modern Designs</p>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <a asp-area="Store" asp-page="/Catalog/Index" class="btn btn-outline-primary">Browse Bangles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+                    <div class="category-overlay position-relative">
+                        <div class="category-bg" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); height: 200px;"></div>
+                        <div class="category-content position-absolute top-50 start-50 translate-middle text-center text-white w-100">
+                            <i class="bi bi-file-text display-1 mb-3"></i>
+                            <h4 class="fw-bold">Sarees</h4>
+                            <p class="mb-0">Elegant Collection</p>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <a asp-area="Store" asp-page="/Catalog/Index" class="btn btn-outline-primary">Browse Sarees</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+                    <div class="category-overlay position-relative">
+                        <div class="category-bg" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); height: 200px;"></div>
+                        <div class="category-content position-absolute top-50 start-50 translate-middle text-center text-white w-100">
+                            <i class="bi bi-flower1 display-1 mb-3"></i>
+                            <h4 class="fw-bold">Blouses</h4>
+                            <p class="mb-0">Custom & Ready-Made</p>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <a asp-area="Store" asp-page="/Catalog/Index" class="btn btn-outline-primary">Browse Blouses</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Features Section -->
 <section class="py-5 bg-light rounded-3">
     <div class="container">
@@ -124,6 +181,109 @@
     </div>
 </section>
 
+<!-- Testimonials Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-semibold">What Our Customers Say</h2>
+            <p class="text-muted">Real experiences from our valued customers</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"Beautiful handcrafted bangles! The quality is exceptional and the designs are unique. I've received so many compliments."</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>P</strong>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Priya Sharma</h6>
+                                <small class="text-muted">Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"The sarees are absolutely stunning! Perfect for any occasion. Fast delivery and excellent customer service."</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>A</strong>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Ananya Reddy</h6>
+                                <small class="text-muted">Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"Love the custom blouse designs! The craftsmanship is remarkable and worth every penny. Highly recommended!"</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>M</strong>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Meera Patel</h6>
+                                <small class="text-muted">Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-5 bg-gradient rounded-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-white mb-4 mb-lg-0">
+                <h2 class="fw-bold mb-3">Stay Updated!</h2>
+                <p class="mb-0">Subscribe to our newsletter and get exclusive offers, new arrivals, and handcrafted tips straight to your inbox.</p>
+            </div>
+            <div class="col-lg-6">
+                <form class="row g-2" onsubmit="event.preventDefault(); showToast('Thank you for subscribing! Check your email for confirmation.', 'success');">
+                    <div class="col-12 col-md-8">
+                        <input type="email" class="form-control form-control-lg" placeholder="Enter your email" required>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <button type="submit" class="btn btn-light btn-lg w-100">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
 <style>
     .hero-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -138,6 +298,26 @@
     .product-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .category-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+    }
+    .category-card:hover .category-bg {
+        transform: scale(1.05);
+    }
+    .category-bg {
+        transition: transform 0.3s ease;
+    }
+    .feature-icon {
+        transition: transform 0.3s ease;
+    }
+    .feature-icon:hover {
+        transform: scale(1.1);
     }
 </style>
 
