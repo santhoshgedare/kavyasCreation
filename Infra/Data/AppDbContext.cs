@@ -21,6 +21,13 @@ namespace Infra.Data
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<UserAddress> UserAddresses => Set<UserAddress>();
+        
+        // New marketplace DbSets
+        public DbSet<Vendor> Vendors => Set<Vendor>();
+        public DbSet<VendorUser> VendorUsers => Set<VendorUser>();
+        public DbSet<BuyerCompany> BuyerCompanies => Set<BuyerCompany>();
+        public DbSet<BuyerUser> BuyerUsers => Set<BuyerUser>();
+        public DbSet<VendorBuyerRelationship> VendorBuyerRelationships => Set<VendorBuyerRelationship>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

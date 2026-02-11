@@ -1,3 +1,4 @@
+using Core.Constants;
 using Core.Interfaces;
 using Infra.Data;
 using Infra.Repositories;
@@ -92,6 +93,14 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IWishlistRepository, WishlistRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IUserAddressRepository, UserAddressRepository>();
+
+// New marketplace repositories
+builder.Services.AddScoped<IVendorRepository, VendorRepository>();
+builder.Services.AddScoped<IVendorUserRepository, VendorUserRepository>();
+builder.Services.AddScoped<IBuyerCompanyRepository, BuyerCompanyRepository>();
+builder.Services.AddScoped<IBuyerUserRepository, BuyerUserRepository>();
+builder.Services.AddScoped<IVendorBuyerRelationshipRepository, VendorBuyerRelationshipRepository>();
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
@@ -244,11 +253,14 @@ using (var scope = app.Services.CreateScope())
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    const string adminRole = "Admin";
-
-    if (!await roleManager.RoleExistsAsync(adminRole))
+    
+    // Seed all roles
+    foreach (var role in Roles.All)
     {
-        await roleManager.CreateAsync(new IdentityRole(adminRole));
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 
     var adminEmail = builder.Configuration["SeedAdmin:Email"] ?? "admin@local";
@@ -267,9 +279,9 @@ using (var scope = app.Services.CreateScope())
         await userManager.CreateAsync(adminUser, adminPassword);
     }
 
-    if (!await userManager.IsInRoleAsync(adminUser, adminRole))
+    if (!await userManager.IsInRoleAsync(adminUser, Roles.Admin))
     {
-        await userManager.AddToRoleAsync(adminUser, adminRole);
+        await userManager.AddToRoleAsync(adminUser, Roles.Admin);
     }
 }
 
