@@ -6,12 +6,14 @@ namespace kavyasCreation.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<StockReservationCleanupService> _logger;
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _interval;
 
-        public StockReservationCleanupService(IServiceProvider serviceProvider, ILogger<StockReservationCleanupService> logger)
+        public StockReservationCleanupService(IServiceProvider serviceProvider, ILogger<StockReservationCleanupService> logger, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            var intervalMinutes = configuration.GetValue<int>("StockManagement:CleanupIntervalMinutes", 5);
+            _interval = TimeSpan.FromMinutes(intervalMinutes);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
