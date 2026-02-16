@@ -19,7 +19,14 @@ namespace Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            // Get featured/latest products for landing page
+            // Redirect to catalog as the new home page
+            return RedirectToPage("/Catalog/Index", new { area = "Store" });
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> About()
+        {
+            // Get featured/latest products for about page
             var featuredProducts = await _unitOfWork.Products.GetFeaturedAsync(8);
             return View(featuredProducts);
         }

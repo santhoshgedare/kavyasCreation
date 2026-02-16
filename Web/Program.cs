@@ -113,6 +113,24 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
 });
 
+// Add response caching for better performance
+builder.Services.AddResponseCaching();
+
+// Add output caching for Razor Pages
+builder.Services.AddOutputCache(options =>
+{
+    // Default policy: cache for 60 seconds
+    options.AddBasePolicy(builder => builder
+        .Expire(TimeSpan.FromSeconds(60))
+        .Tag("default"));
+    
+    // Catalog pages: cache for 2 minutes, vary by query string
+    options.AddPolicy("catalog", builder => builder
+        .Expire(TimeSpan.FromMinutes(2))
+        .SetVaryByQuery("categoryId", "search")
+        .Tag("catalog"));
+});
+
 // Add memory cache
 builder.Services.AddMemoryCache();
 
@@ -200,6 +218,10 @@ else
 
 app.UseResponseCompression();
 
+// Add response caching middleware (must be before routing)
+app.UseResponseCaching();
+app.UseOutputCache();
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -212,16 +234,10 @@ app.UseSession();
 
 app.MapStaticAssets();
 
-// Redirect root to Identity login page
+// Redirect root to Catalog page (new home)
 app.MapGet("/", context =>
 {
-    if (context.User?.Identity?.IsAuthenticated == true)
-    {
-        context.Response.Redirect("/Store/Catalog");
-        return Task.CompletedTask;
-    }
-
-    context.Response.Redirect("/Home/Index");
+    context.Response.Redirect("/Store/Catalog");
     return Task.CompletedTask;
 });
 

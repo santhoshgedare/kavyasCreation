@@ -1,0 +1,455 @@
+@model IEnumerable<Core.Entities.Product>
+@{
+    ViewData["Title"] = "About Kavya's Creations - My Handcraft Journey";
+}
+
+<!-- Hero Section - Kavya's Story -->
+<section class="hero-about">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="story-badge mb-3">
+                    <i class="bi bi-heart-fill me-2"></i> Meet the Founder
+                </div>
+                <h1 class="display-3 fw-bold mb-4">From Science to <span class="text-gradient">Handcrafts</span></h1>
+                <p class="lead mb-4">
+                    Hi, I'm <strong>Kavya</strong> — a food scientist turned handcraft artist. After years in the food industry, I'm now following my true passion: creating beautiful handcrafted pieces that bring joy to people's lives.
+                </p>
+                <div class="founder-details">
+                    <div class="detail-item">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <div>
+                            <h6>Education</h6>
+                            <p>M.Sc. in Food Science</p>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="bi bi-briefcase-fill"></i>
+                        <div>
+                            <h6>Experience</h6>
+                            <p>Food Industry Professional</p>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="bi bi-palette-fill"></i>
+                        <div>
+                            <h6>Passion</h6>
+                            <p>Lifelong Handcraft Enthusiast</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a class="btn btn-primary btn-lg me-3" asp-area="Store" asp-page="/Catalog/Index">
+                        <i class="bi bi-shop"></i> Shop My Creations
+                    </a>
+                    <a class="btn btn-outline-primary btn-lg" href="#my-story">
+                        <i class="bi bi-book"></i> Read My Story
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="founder-image-wrapper">
+                    <div class="founder-card">
+                        <div class="founder-photo mb-4">
+                            <img src="~/images/WhatsApp Image 2026-02-16 at 11.23.24 PM (3).jpeg" 
+                                 alt="Kavya - Founder of Kavya's Creations" 
+                                 class="img-fluid rounded-4 shadow-lg"
+                                 style="max-height: 400px; width: 100%; object-fit: cover;">
+                        </div>
+                        <div class="founder-quote">
+                            <i class="bi bi-quote quote-icon"></i>
+                            <p>"Every piece I create carries a piece of my heart and a story of passion."</p>
+                            <span class="quote-author">— Kavya</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- My Story Section -->
+<section class="py-5 bg-light" id="my-story">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-3">My Journey</h2>
+                    <p class="lead text-muted">From Laboratory to Creative Studio</p>
+                </div>
+                
+                <div class="story-timeline">
+                    <!-- Step 1: Education & Career -->
+                    <div class="story-step">
+                        <div class="step-icon">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <div class="step-content">
+                            <h3 class="fw-bold mb-3">The Academic Path</h3>
+                            <p class="mb-3">
+                                My journey began in the world of science. After completing my <strong>Master's in Food Science</strong>, 
+                                I stepped into the food industry, working with various companies and gaining valuable experience 
+                                in product development, quality control, and research.
+                            </p>
+                            <p class="text-muted">
+                                While I enjoyed the precision and methodology of science, something was always calling me back to my roots...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: The Hobby -->
+                    <div class="story-step">
+                        <div class="step-icon">
+                            <i class="bi bi-heart"></i>
+                        </div>
+                        <div class="step-content">
+                            <h3 class="fw-bold mb-3">A Lifelong Passion</h3>
+                            <p class="mb-3">
+                                Throughout my career, <strong>handcrafts were always my escape</strong>. Whether it was intricate 
+                                bangles, beautiful sarees, or delicate blouses, I spent every free moment creating. What started 
+                                as a hobby soon became my sanctuary — a place where science met art, and precision met creativity.
+                            </p>
+                            <p class="text-muted">
+                                Friends and family loved my creations, often asking, "Why don't you sell these?" That question planted a seed...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: The Leap -->
+                    <div class="story-step">
+                        <div class="step-icon">
+                            <i class="bi bi-rocket"></i>
+                        </div>
+                        <div class="step-content">
+                            <h3 class="fw-bold mb-3">Taking the Leap</h3>
+                            <p class="mb-3">
+                                In 2024, I made a bold decision: to turn my passion into a business. <strong>Kavya's Creations was born</strong> — 
+                                not just as a store, but as a celebration of handmade art, traditional craftsmanship, and the joy 
+                                of creating something beautiful with your own hands.
+                            </p>
+                            <p class="text-muted">
+                                Every piece you see here is crafted with the same attention to detail I learned in the lab, 
+                                combined with the love and creativity I've nurtured all my life.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Today -->
+                    <div class="story-step">
+                        <div class="step-icon">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <div class="step-content">
+                            <h3 class="fw-bold mb-3">Today & Beyond</h3>
+                            <p class="mb-3">
+                                Today, I wake up every day excited to create. Each bangle, saree, and blouse tells a story — 
+                                mine and yours. My background in science taught me discipline, quality control, and perfection. 
+                                My passion for handcrafts taught me patience, creativity, and the beauty of imperfection.
+                            </p>
+                            <div class="highlight-box">
+                                <i class="bi bi-hand-thumbs-up text-primary"></i>
+                                <p class="mb-0">
+                                    <strong>My Promise:</strong> Every product is handcrafted by me with love, care, and attention 
+                                    to detail. When you buy from Kavya's Creations, you're not just buying a product — 
+                                    you're supporting a dream, preserving traditional art, and owning something truly unique.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- What Makes Us Special -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">What Makes My Creations Special</h2>
+            <p class="lead text-muted">The perfect blend of science, art, and heart</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-hand-index"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">100% Handcrafted</h5>
+                    <p class="text-muted">Every piece is made by hand — no mass production, no machines. Just pure craftsmanship.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-patch-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Quality Assured</h5>
+                    <p class="text-muted">My scientific training ensures every product meets the highest quality standards.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-heart-pulse"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Made with Love</h5>
+                    <p class="text-muted">Each creation carries my personal touch, passion, and dedication to the craft.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Uniquely Yours</h5>
+                    <p class="text-muted">No two pieces are exactly alike — making your purchase truly one-of-a-kind.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="py-5 bg-gradient-subtle">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">My Core Values</h2>
+            <p class="lead text-muted">What I stand for and believe in</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <i class="bi bi-shield-heart value-icon"></i>
+                    <h4 class="fw-bold mb-3">Authenticity</h4>
+                    <p class="text-muted">Real handcraft, real materials, real stories. No shortcuts, no compromises.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <i class="bi bi-people-fill value-icon"></i>
+                    <h4 class="fw-bold mb-3">Community</h4>
+                    <p class="text-muted">Building connections with customers who appreciate the art of handmade.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <i class="bi bi-tree-fill value-icon"></i>
+                    <h4 class="fw-bold mb-3">Sustainability</h4>
+                    <p class="text-muted">Using eco-friendly materials and supporting traditional, sustainable practices.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <i class="bi bi-lightbulb-fill value-icon"></i>
+                    <h4 class="fw-bold mb-3">Innovation</h4>
+                    <p class="text-muted">Blending traditional techniques with modern designs and scientific precision.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <i class="bi bi-trophy-fill value-icon"></i>
+                    <h4 class="fw-bold mb-3">Excellence</h4>
+                    <p class="text-muted">Never settling for "good enough" — every piece must be exceptional.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <i class="bi bi-emoji-smile-fill value-icon"></i>
+                    <h4 class="fw-bold mb-3">Joy</h4>
+                    <p class="text-muted">Creating happiness — both in the making and in the giving.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 cta-section">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <h2 class="display-5 fw-bold mb-3">Be Part of My Journey</h2>
+                <p class="lead mb-0">
+                    When you shop at Kavya's Creations, you're not just buying a product — you're supporting a dream, 
+                    preserving traditional art, and owning something truly unique and beautiful.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a class="btn btn-primary btn-lg px-5" asp-area="Store" asp-page="/Catalog/Index">
+                    <i class="bi bi-cart-plus"></i> Start Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold text-primary mb-2">100%</h2>
+                    <p class="text-muted mb-0">Handcrafted by Me</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold text-primary mb-2">2024</h2>
+                    <p class="text-muted mb-0">Year Founded</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold text-primary mb-2">1000+</h2>
+                    <p class="text-muted mb-0">Products Created</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold text-primary mb-2">? 4.9</h2>
+                    <p class="text-muted mb-0">Customer Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products from Kavya -->
+@if (Model != null && Model.Any())
+{
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Featured Creations</h2>
+                <p class="lead text-muted">Some of my favorite pieces I've created recently</p>
+            </div>
+            <div class="row g-4">
+                @foreach (var product in Model.Take(3))
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img src="@(product.Images.FirstOrDefault()?.Url ?? "/uploads/products/placeholder.svg")" class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                            <div class="card-body">
+                                <span class="badge bg-primary mb-2">@(product.Category?.Name ?? "Uncategorized")</span>
+                                <h5 class="card-title fw-bold">@product.Name</h5>
+                                <p class="card-text text-muted">@(product.Description ?? "")</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 mb-0 text-primary">?@product.Price.ToString("N2")</span>
+                                    <a asp-area="Store" asp-page="/Catalog/Details" asp-route-id="@product.Id" class="btn btn-outline-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="text-center mt-4">
+                <a asp-area="Store" asp-page="/Catalog/Index" class="btn btn-primary btn-lg">
+                    <i class="bi bi-grid-3x3-gap"></i> View All Products
+                </a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Customer Testimonials -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">What Customers Say</h2>
+            <p class="lead text-muted">Feedback from people who love my creations</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"Kavya's bangles are absolutely stunning! You can see the love and attention to detail in every piece. Highly recommend!"</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>P</strong>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Priya Sharma</h6>
+                                <small class="text-muted">Bangalore</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"The saree blouse I ordered was perfect! Beautiful craftsmanship and fits like a dream. Worth every penny!"</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>A</strong>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Ananya Reddy</h6>
+                                <small class="text-muted">Hyderabad</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"Love supporting Kavya's journey! Her products are unique and made with such care. Customer service is excellent too!"</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>M</strong>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0">Meera Patel</h6>
+                                <small class="text-muted">Mumbai</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final Call to Action -->
+<section class="py-5 cta-section">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">Start Your Journey with Kavya's Creations</h2>
+        <p class="lead mb-4">Every purchase supports my dream and brings a handcrafted treasure to your home</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a class="btn btn-primary btn-lg px-5" asp-area="Store" asp-page="/Catalog/Index">
+                <i class="bi bi-shop"></i> Browse Collection
+            </a>
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <a class="btn btn-outline-primary btn-lg" asp-area="Identity" asp-page="/Account/Register">
+                    <i class="bi bi-person-plus"></i> Create Account
+                </a>
+            }
+        </div>
+    </div>
+</section>
+

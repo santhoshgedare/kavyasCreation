@@ -4,6 +4,8 @@ using Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Infra.Data;
 
 namespace Web.Areas.Store.Pages.Cart
 {
@@ -11,12 +13,12 @@ namespace Web.Areas.Store.Pages.Cart
     public class IndexModel : PageModel
     {
         private readonly CartService _cartService;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly AppDbContext _db;
 
-        public IndexModel(CartService cartService, IUnitOfWork unitOfWork)
+        public IndexModel(CartService cartService, AppDbContext db)
         {
             _cartService = cartService;
-            _unitOfWork = unitOfWork;
+            _db = db;
         }
 
         public IReadOnlyList<CartItem> Items { get; private set; } = [];
@@ -28,14 +30,16 @@ namespace Web.Areas.Store.Pages.Cart
             Items = _cartService.GetItems();
             Total = _cartService.GetTotal();
             
-            // Check available stock for each item
-            foreach (var item in Items)
+            // OPTIMIZED: Single query to get all stock info instead of N queries
+            if (Items.Any())
             {
-                var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
-                if (product is not null)
-                {
-                    AvailableStock[item.ProductId] = product.AvailableStock;
-                }
+                var productIds = Items.Select(i => i.ProductId).ToList();
+                
+                AvailableStock = await _db.Products
+                    .Where(p => productIds.Contains(p.Id))
+                    .Select(p => new { p.Id, p.AvailableStock })
+                    .AsNoTracking()
+                    .ToDictionaryAsync(p => p.Id, p => p.AvailableStock);
             }
         }
 
@@ -52,3 +56,4 @@ namespace Web.Areas.Store.Pages.Cart
         }
     }
 }
+

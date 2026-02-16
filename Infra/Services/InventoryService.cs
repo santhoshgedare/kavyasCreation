@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Interfaces;
+using Core.Constants;
 using Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -47,6 +48,7 @@ namespace Infra.Services
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
+                // Single query - tracked for updates
                 var product = await _db.Products.FindAsync(productId);
                 if (product is null || product.AvailableStock < quantity)
                 {
@@ -55,6 +57,7 @@ namespace Infra.Services
                     return null;
                 }
 
+                var stockBefore = product.Stock;
                 product.ReservedStock += quantity;
 
                 var reservation = new StockReservation
@@ -71,8 +74,22 @@ namespace Infra.Services
 
                 _db.StockReservations.Add(reservation);
 
-                await RecordStockMovementAsync(productId, -quantity, "Reservation", userId, reservation.Id.ToString(), 
-                    $"Reserved {quantity} units for user {userId}");
+                // OPTIMIZED: Use already-loaded product instead of querying again
+                var movement = new StockMovement
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = productId,
+                    Quantity = -quantity,
+                    StockBefore = stockBefore,
+                    StockAfter = product.Stock,
+                    MovementType = StockMovementTypes.Reservation,
+                    ReferenceId = reservation.Id.ToString(),
+                    Notes = $"Reserved {quantity} units for user {userId}",
+                    PerformedBy = userId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                
+                _db.StockMovements.Add(movement);
 
                 await _db.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -130,7 +147,7 @@ namespace Infra.Services
                 reservation.Product.ReservedStock -= reservation.Quantity;
                 reservation.Product.Stock -= reservation.Quantity;
 
-                await RecordStockMovementAsync(reservation.ProductId, -reservation.Quantity, "Sale", 
+                await RecordStockMovementAsync(reservation.ProductId, -reservation.Quantity, StockMovementTypes.Sale, 
                     reservation.UserId, orderId.ToString(), $"Order {orderId} committed");
 
                 await _db.SaveChangesAsync();
@@ -168,7 +185,7 @@ namespace Infra.Services
 
                 reservation.IsCancelled = true;
 
-                await RecordStockMovementAsync(reservation.ProductId, reservation.Quantity, "Release", 
+                await RecordStockMovementAsync(reservation.ProductId, reservation.Quantity, StockMovementTypes.Release, 
                     reservation.UserId, reservationId.ToString(), "Reservation cancelled");
 
                 await _db.SaveChangesAsync();
@@ -200,8 +217,8 @@ namespace Infra.Services
                 }
                 reservation.IsCancelled = true;
 
-                await RecordStockMovementAsync(reservation.ProductId, reservation.Quantity, "Release", 
-                    "System", reservation.Id.ToString(), "Expired reservation released");
+                await RecordStockMovementAsync(reservation.ProductId, reservation.Quantity, StockMovementTypes.Release, 
+                    SystemUsers.System, reservation.Id.ToString(), "Expired reservation released");
             }
 
             if (expiredReservations.Any())

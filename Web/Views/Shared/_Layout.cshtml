@@ -7,15 +7,21 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modern-framework.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/ui-enhancements.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/kavyasCreation.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <!-- Page Loading Indicator -->
+    <div id="pageLoader" class="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+    
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-center gap-3" asp-area="" asp-controller="Home" asp-action="Index"> 
+                <a class="navbar-brand d-flex align-items-center gap-3" asp-area="Store" asp-page="/Catalog/Index"> 
                     <div class="d-flex flex-column">
                         <span class="brand-title">Kavya's Creations</span>
                         <small class="brand-subtitle">Handcrafted Excellence</small>
@@ -28,23 +34,26 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="Store" asp-page="/Catalog/Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">About</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                     <li class="nav-item">
-                         <a class="nav-link" asp-area="Store" asp-page="/Catalog/Index">Store</a>
-                     </li>
-                     <li class="nav-item">
-                         <a class="nav-link" asp-area="Store" asp-page="/Cart/Index">Cart</a>
-                     </li>
-                     <li class="nav-item">
-                         <a class="nav-link" asp-area="Store" asp-page="/Orders/Index">Orders</a>
-                     </li>
-                     <li class="nav-item">
-                         <a class="nav-link" asp-area="Store" asp-page="/Payment/Index">Payment</a>
-                     </li>
+                     @if (User.Identity?.IsAuthenticated == true)
+                     {
+                         <li class="nav-item">
+                             <a class="nav-link" asp-area="Store" asp-page="/Cart/Index">Cart</a>
+                         </li>
+                         <li class="nav-item">
+                             <a class="nav-link" asp-area="Store" asp-page="/Orders/Index">Orders</a>
+                         </li>
+                         <li class="nav-item">
+                             <a class="nav-link" asp-area="Store" asp-page="/Payment/Index">Payment</a>
+                         </li>
+                     }
                      @if (User.IsInRole("Admin"))
                      {
                          <li class="nav-item dropdown">
@@ -154,23 +163,23 @@
         </main>
     </div>
 
-    <footer class="border-top bg-light py-4 mt-auto">
+    <footer class="footer-custom border-top py-4 mt-auto">
         <div class="container">
             <div class="row g-4">
                 <div class="col-md-4">
                     <h5 class="fw-bold mb-3">Kavya's Creations</h5>
                     <p class="text-muted">Handcrafted excellence in bangles, sarees, and blouses. Each piece made with love and tradition.</p>
                     <div class="d-flex gap-3 mt-3">
-                        <a href="#" class="text-muted" title="Facebook">
+                        <a href="#" class="footer-link" title="Facebook">
                             <i class="bi bi-facebook fs-4"></i>
                         </a>
-                        <a href="#" class="text-muted" title="Instagram">
+                        <a href="#" class="footer-link" title="Instagram">
                             <i class="bi bi-instagram fs-4"></i>
                         </a>
-                        <a href="#" class="text-muted" title="Twitter">
+                        <a href="#" class="footer-link" title="Twitter">
                             <i class="bi bi-twitter fs-4"></i>
                         </a>
-                        <a href="#" class="text-muted" title="Pinterest">
+                        <a href="#" class="footer-link" title="Pinterest">
                             <i class="bi bi-pinterest fs-4"></i>
                         </a>
                     </div>
@@ -178,19 +187,22 @@
                 <div class="col-md-2">
                     <h6 class="fw-semibold mb-3">Quick Links</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Catalog/Index">Shop</a></li>
-                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Cart/Index">Cart</a></li>
-                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="Store" asp-page="/Orders/Index">Orders</a></li>
+                        <li class="mb-2"><a class="footer-link text-decoration-none" asp-area="Store" asp-page="/Catalog/Index">Home</a></li>
+                        <li class="mb-2"><a class="footer-link text-decoration-none" asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="mb-2"><a class="footer-link text-decoration-none" asp-area="Store" asp-page="/Cart/Index">Cart</a></li>
+                            <li class="mb-2"><a class="footer-link text-decoration-none" asp-area="Store" asp-page="/Orders/Index">Orders</a></li>
+                        }
                     </ul>
                 </div>
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3">Customer Service</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a class="text-muted text-decoration-none" href="#">Contact Us</a></li>
-                        <li class="mb-2"><a class="text-muted text-decoration-none" href="#">Shipping Info</a></li>
-                        <li class="mb-2"><a class="text-muted text-decoration-none" href="#">Returns</a></li>
-                        <li class="mb-2"><a class="text-muted text-decoration-none" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                        <li class="mb-2"><a class="footer-link text-decoration-none" href="#">Contact Us</a></li>
+                        <li class="mb-2"><a class="footer-link text-decoration-none" href="#">Shipping Info</a></li>
+                        <li class="mb-2"><a class="footer-link text-decoration-none" href="#">Returns</a></li>
+                        <li class="mb-2"><a class="footer-link text-decoration-none" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
@@ -206,7 +218,14 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
                 <div class="text-muted">&copy; 2026 Kavya's Creations. All rights reserved.</div>
                 <div class="mt-3 mt-md-0">
-                    <img src="~/images/payment-methods.svg" alt="Payment Methods" style="height: 30px;" onerror="this.style.display='none'">
+                    <!-- Payment Method Icons (Bootstrap Icons - No external dependencies) -->
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small me-2">We Accept:</span>
+                        <i class="bi bi-credit-card-2-front fs-4 text-muted" title="Credit Cards"></i>
+                        <i class="bi bi-paypal fs-4 text-muted" title="PayPal"></i>
+                        <i class="bi bi-wallet2 fs-4 text-muted" title="Digital Wallets"></i>
+                        <i class="bi bi-bank fs-4 text-muted" title="Bank Transfer"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,6 +259,49 @@
     <script src="~/js/ui-enhancements.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+        // ===================================
+        // PAGE LOADING INDICATOR
+        // ===================================
+        (function() {
+            const loader = document.getElementById('pageLoader');
+            
+            // Hide loader when page is fully loaded
+            window.addEventListener('load', function() {
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 300);
+                }
+            });
+            
+            // Show loader on navigation
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && link.href && !link.target && !link.hasAttribute('data-no-loader')) {
+                    const url = new URL(link.href);
+                    // Only show loader for same-origin navigation
+                    if (url.origin === window.location.origin) {
+                        if (loader) {
+                            loader.style.display = 'flex';
+                            loader.style.opacity = '1';
+                        }
+                    }
+                }
+            });
+            
+            // Show loader on form submission
+            document.addEventListener('submit', function(e) {
+                if (loader && !e.target.hasAttribute('data-no-loader')) {
+                    loader.style.display = 'flex';
+                    loader.style.opacity = '1';
+                }
+            });
+        })();
+        
+        // ===================================
+        // THEME TOGGLE - IMPROVED VERSION
+        // ===================================
         (function () {
             const storageKey = "theme";
             const toggle = document.getElementById("themeToggle");
@@ -247,25 +309,104 @@
             const root = document.documentElement;
 
             const applyTheme = (theme) => {
-                root.setAttribute("data-bs-theme", theme);
-                if (icon) {
-                    icon.textContent = theme === "dark" ? "☀️" : "🌙";
-                }
+                // Remove any existing theme attribute first
+                root.removeAttribute("data-bs-theme");
+                
+                // Apply new theme
+                setTimeout(() => {
+                    root.setAttribute("data-bs-theme", theme);
+                    if (icon) {
+                        icon.textContent = theme === "dark" ? "☀️" : "🌙";
+                    }
+                    
+                    // Add smooth transition class
+                    document.body.classList.add('theme-transitioning');
+                    setTimeout(() => {
+                        document.body.classList.remove('theme-transitioning');
+                    }, 300);
+                }, 10);
             };
 
-            const stored = localStorage.getItem(storageKey) || "light";
-            applyTheme(stored);
+            // Get stored theme or default to light
+            const stored = localStorage.getItem(storageKey);
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = stored || (prefersDark ? 'dark' : 'light');
+            
+            // Apply theme immediately on page load
+            applyTheme(initialTheme);
 
+            // Handle toggle clicks
             if (toggle) {
-                toggle.addEventListener("click", () => {
-                    const current = root.getAttribute("data-bs-theme") === "dark" ? "dark" : "light";
+                toggle.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const current = root.getAttribute("data-bs-theme") || "light";
                     const next = current === "dark" ? "light" : "dark";
+                    
                     localStorage.setItem(storageKey, next);
                     applyTheme(next);
+                    
+                    console.log('Theme toggled to:', next);
                 });
             }
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem(storageKey)) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            });
+        })();
+        
+        // ===================================
+        // BACK TO TOP BUTTON
+        // ===================================
+        (function() {
+            const backToTop = document.getElementById('backToTop');
+            if (backToTop) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 300) {
+                        backToTop.style.display = 'block';
+                    } else {
+                        backToTop.style.display = 'none';
+                    }
+                });
+                
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        })();
+        
+        // ===================================
+        // FIX BOOTSTRAP DROPDOWNS
+        // ===================================
+        (function() {
+            // Ensure all dropdowns are properly initialized
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize all dropdowns
+                const dropdownElementList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+                const dropdownList = [...dropdownElementList].map(dropdownToggleEl => {
+                    return new bootstrap.Dropdown(dropdownToggleEl);
+                });
+                
+                console.log('Initialized', dropdownList.length, 'dropdowns');
+            });
+            
+            // Fix for dropdowns not working after page load
+            setTimeout(function() {
+                const dropdowns = document.querySelectorAll('.dropdown-toggle');
+                dropdowns.forEach(function(dropdown) {
+                    // Remove any conflicting event handlers
+                    dropdown.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                });
+            }, 500);
         })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+

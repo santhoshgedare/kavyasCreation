@@ -1,0 +1,221 @@
+@page
+@model Web.Areas.Store.Pages.Cart.IndexModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<!-- Modern Breadcrumb -->
+<nav class="breadcrumb-modern">
+    <span class="breadcrumb-item-modern">
+        <a asp-area="Store" asp-page="/Catalog/Index">
+            <i class="bi bi-house-door"></i> Home
+        </a>
+    </span>
+    <span class="breadcrumb-item-modern">Shopping Cart</span>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header-modern flex-between">
+    <div>
+        <h1 class="page-title-modern">
+            <i class="bi bi-bag-heart text-primary"></i>
+            Your Shopping Cart
+        </h1>
+        <p class="page-subtitle-modern">Review and manage items before checkout</p>
+    </div>
+    <a class="btn-modern btn-modern-outline no-print" asp-page="/Catalog/Index" asp-area="Store">
+        <i class="bi bi-arrow-left"></i>
+        <span class="d-none d-md-inline">Continue Shopping</span>
+    </a>
+</div>
+
+@if (!Model.Items.Any())
+{
+    <!-- Empty State -->
+    <div class="card-modern">
+        <div class="empty-state-modern">
+            <div class="empty-state-icon">
+                <i class="bi bi-cart-x"></i>
+            </div>
+            <h3 class="empty-state-title">Your cart is empty</h3>
+            <p class="empty-state-text">Looks like you haven't added any items to your cart yet.</p>
+            <a class="btn-modern btn-modern-primary btn-modern-lg" asp-page="/Catalog/Index" asp-area="Store">
+                <i class="bi bi-shop"></i> Start Shopping
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="grid-modern" style="grid-template-columns: 1fr; gap: var(--spacing-xl);">
+        <!-- Cart Items -->
+        <div class="card-modern">
+            <h2 class="h5 mb-4">Cart Items (@Model.Items.Count)</h2>
+            
+            <!-- Desktop Table View -->
+            <div class="d-none d-md-block">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="@(item.ImageUrl ?? "/uploads/products/placeholder.svg")" 
+                                             alt="@item.Name" 
+                                             class="rounded-modern" 
+                                             style="width:64px;height:64px;object-fit:cover;" />
+                                        <div>
+                                            <div class="fw-semibold">
+                                                <a class="text-decoration-none" asp-page="/Catalog/Details" asp-area="Store" asp-route-id="@item.ProductId">
+                                                    @item.Name
+                                                </a>
+                                            </div>
+                                            <div class="text-secondary small">@item.Price.ToString("C")</div>
+                                            @if (Model.AvailableStock.TryGetValue(item.ProductId, out var available))
+                                            {
+                                                @if (available < item.Quantity)
+                                                {
+                                                    <span class="badge-modern badge-danger mt-2">
+                                                        <i class="bi bi-exclamation-circle"></i> Only @available in stock
+                                                    </span>
+                                                }
+                                                else if (available < 10)
+                                                {
+                                                    <span class="badge-modern badge-warning mt-2">
+                                                        <i class="bi bi-exclamation-triangle"></i> @available available
+                                                    </span>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <form method="post" asp-page-handler="Update" class="d-inline">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="quantity" value="@(item.Quantity - 1)" />
+                                            <button type="submit" class="btn-modern btn-modern-icon btn-modern-secondary btn-modern-sm" @(item.Quantity <= 1 ? "disabled" : "")>
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                        </form>
+                                        <span class="fw-semibold px-3">@item.Quantity</span>
+                                        <form method="post" asp-page-handler="Update" class="d-inline">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="quantity" value="@(item.Quantity + 1)" />
+                                            <button type="submit" class="btn-modern btn-modern-icon btn-modern-secondary btn-modern-sm">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td class="text-end fw-semibold">@item.Price.ToString("C")</td>
+                                <td class="text-end fw-bold text-primary">@((item.Price * item.Quantity).ToString("C"))</td>
+                                <td class="text-end">
+                                    <form method="post" asp-page-handler="Remove" class="d-inline">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <button type="submit" class="btn-modern btn-modern-ghost btn-modern-icon btn-modern-sm no-print" title="Remove">
+                                            <i class="bi bi-trash text-danger"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="d-md-none">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="card-modern card-modern-sm mb-3">
+                        <div class="d-flex gap-3 mb-3">
+                            <img src="@(item.ImageUrl ?? "/uploads/products/placeholder.svg")" 
+                                 alt="@item.Name" 
+                                 class="rounded-modern" 
+                                 style="width:80px;height:80px;object-fit:cover;" />
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a class="text-decoration-none" asp-page="/Catalog/Details" asp-area="Store" asp-route-id="@item.ProductId">
+                                        @item.Name
+                                    </a>
+                                </h6>
+                                <div class="text-secondary small mb-2">@item.Price.ToString("C")</div>
+                                @if (Model.AvailableStock.TryGetValue(item.ProductId, out var available))
+                                {
+                                    @if (available < item.Quantity)
+                                    {
+                                        <span class="badge-modern badge-danger">
+                                            <i class="bi bi-exclamation-circle"></i> Only @available in stock
+                                        </span>
+                                    }
+                                }
+                            </div>
+                            <form method="post" asp-page-handler="Remove" class="no-print">
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="btn-modern btn-modern-ghost btn-modern-icon btn-modern-sm">
+                                    <i class="bi bi-trash text-danger"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="flex-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <form method="post" asp-page-handler="Update">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="quantity" value="@(item.Quantity - 1)" />
+                                    <button type="submit" class="btn-modern btn-modern-icon btn-modern-secondary btn-modern-sm" @(item.Quantity <= 1 ? "disabled" : "")>
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                </form>
+                                <span class="fw-semibold px-2">@item.Quantity</span>
+                                <form method="post" asp-page-handler="Update">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="quantity" value="@(item.Quantity + 1)" />
+                                    <button type="submit" class="btn-modern btn-modern-icon btn-modern-secondary btn-modern-sm">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="fw-bold text-primary">@((item.Price * item.Quantity).ToString("C"))</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="card-modern" style="position: sticky; top: 20px;">
+            <h2 class="h5 mb-4">Order Summary</h2>
+            <div class="list-group-modern">
+                <div class="list-group-item-modern flex-between">
+                    <span class="text-secondary">Subtotal (@Model.Items.Count items)</span>
+                    <span class="fw-semibold">@Model.Total.ToString("C")</span>
+                </div>
+                <div class="list-group-item-modern flex-between">
+                    <span class="text-secondary">Shipping</span>
+                    <span class="fw-semibold">Calculated at checkout</span>
+                </div>
+                <div class="list-group-item-modern flex-between">
+                    <span class="fw-bold">Total</span>
+                    <span class="fw-bold text-primary h4 mb-0">@Model.Total.ToString("C")</span>
+                </div>
+            </div>
+            <a class="btn-modern btn-modern-primary w-100 mt-4 no-print" asp-page="/Checkout/Index" asp-area="Store">
+                <i class="bi bi-credit-card"></i> Proceed to Checkout
+            </a>
+            <a class="btn-modern btn-modern-ghost w-100 mt-2 no-print" asp-page="/Catalog/Index" asp-area="Store">
+                <i class="bi bi-arrow-left"></i> Continue Shopping
+            </a>
+        </div>
+    </div>
+}

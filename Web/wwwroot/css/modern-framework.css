@@ -1,0 +1,697 @@
+/* ========================================
+   KAVYA'S CREATIONS - MODERN UI FRAMEWORK
+   Mobile-First Responsive Design System
+   ======================================== */
+
+/* ========================================
+   CSS VARIABLES - Design Tokens
+   ======================================== */
+:root {
+    /* Colors - Light Theme */
+    --primary: #667eea;
+    --primary-dark: #764ba2;
+    --secondary: #f093fb;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    
+    /* Neutral Colors */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    
+    /* Semantic Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: var(--gray-50);
+    --text-primary: var(--gray-900);
+    --text-secondary: var(--gray-600);
+    --text-muted: var(--gray-500);
+    --border-color: var(--gray-200);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Theme Variables */
+html[data-bs-theme="dark"] {
+    --bg-primary: var(--gray-900);
+    --bg-secondary: var(--gray-800);
+    --text-primary: var(--gray-50);
+    --text-secondary: var(--gray-300);
+    --text-muted: var(--gray-400);
+    --border-color: var(--gray-700);
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* ========================================
+   MODERN CONTAINER SYSTEM
+   ======================================== */
+.modern-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+    .modern-container {
+        padding: 0 var(--spacing-xl);
+    }
+}
+
+/* ========================================
+   MODERN CARD SYSTEM
+   ======================================== */
+.card-modern {
+    background: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    transition: all var(--transition-base);
+    border: 1px solid var(--border-color);
+}
+
+.card-modern:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+}
+
+.card-modern-sm {
+    padding: var(--spacing-lg);
+}
+
+.card-modern-lg {
+    padding: var(--spacing-2xl);
+}
+
+/* ========================================
+   MODERN BUTTONS
+   ======================================== */
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    font-size: 0.9375rem;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-modern:active {
+    transform: translateY(0);
+}
+
+.btn-modern-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.btn-modern-secondary {
+    background: var(--gray-100);
+    color: var(--text-primary);
+}
+
+html[data-bs-theme="dark"] .btn-modern-secondary {
+    background: var(--gray-700);
+}
+
+.btn-modern-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-modern-ghost {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.btn-modern-ghost:hover {
+    background: var(--gray-100);
+}
+
+html[data-bs-theme="dark"] .btn-modern-ghost:hover {
+    background: var(--gray-800);
+}
+
+/* Button Sizes */
+.btn-modern-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn-modern-lg {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+.btn-modern-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border-radius: 50%;
+}
+
+/* ========================================
+   MODERN INPUT SYSTEM
+   ======================================== */
+.input-modern {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    font-size: 0.9375rem;
+    transition: all var(--transition-fast);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.input-modern:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.input-modern::placeholder {
+    color: var(--text-muted);
+}
+
+.input-group-modern {
+    position: relative;
+}
+
+.input-group-modern .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.input-group-modern .input-modern {
+    padding-left: 3rem;
+}
+
+/* ========================================
+   MODERN BADGE SYSTEM
+   ======================================== */
+.badge-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info);
+}
+
+html[data-bs-theme="dark"] .badge-success {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+html[data-bs-theme="dark"] .badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+html[data-bs-theme="dark"] .badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* ========================================
+   PAGE HEADER COMPONENT
+   ======================================== */
+.page-header-modern {
+    margin-bottom: var(--spacing-xl);
+}
+
+.page-title-modern {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-subtitle-modern {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+@media (min-width: 768px) {
+    .page-title-modern {
+        font-size: 2.5rem;
+    }
+}
+
+/* ========================================
+   EMPTY STATE COMPONENT
+   ======================================== */
+.empty-state-modern {
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-xl);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    color: var(--gray-300);
+    margin-bottom: var(--spacing-lg);
+}
+
+html[data-bs-theme="dark"] .empty-state-icon {
+    color: var(--gray-700);
+}
+
+.empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* ========================================
+   TABLE SYSTEM
+   ======================================== */
+.table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-modern thead th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-modern tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-modern tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-modern tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table-modern tbody tr:hover {
+    background: var(--gray-50);
+}
+
+html[data-bs-theme="dark"] .table-modern tbody tr:hover {
+    background: var(--gray-800);
+}
+
+/* Mobile Responsive Table */
+@media (max-width: 767px) {
+    .table-modern thead {
+        display: none;
+    }
+    
+    .table-modern, 
+    .table-modern tbody, 
+    .table-modern tr, 
+    .table-modern td {
+        display: block;
+        width: 100%;
+    }
+    
+    .table-modern tr {
+        margin-bottom: var(--spacing-lg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+    }
+    
+    .table-modern td {
+        padding: 0.5rem 0;
+        border: none;
+    }
+    
+    .table-modern td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+}
+
+/* ========================================
+   LIST GROUP MODERN
+   ======================================== */
+.list-group-modern {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-group-item-modern {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-fast);
+}
+
+.list-group-item-modern:last-child {
+    border-bottom: none;
+}
+
+.list-group-item-modern:hover {
+    background: var(--gray-50);
+}
+
+html[data-bs-theme="dark"] .list-group-item-modern:hover {
+    background: var(--gray-800);
+}
+
+/* ========================================
+   ALERT SYSTEM
+   ======================================== */
+.alert-modern {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.alert-modern-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.alert-modern-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.alert-modern-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.alert-modern-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* ========================================
+   BREADCRUMB MODERN
+   ======================================== */
+.breadcrumb-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.breadcrumb-item-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.breadcrumb-item-modern a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb-item-modern a:hover {
+    color: var(--primary-dark);
+}
+
+.breadcrumb-item-modern:not(:last-child)::after {
+    content: "›";
+    margin-left: 0.5rem;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+/* ========================================
+   LOADING STATES
+   ======================================== */
+.skeleton {
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.spinner-modern {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spinner-rotate 0.6s linear infinite;
+}
+
+@keyframes spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.text-primary { color: var(--primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
+.bg-primary { background: var(--primary) !important; }
+.bg-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important; }
+
+.rounded-modern { border-radius: var(--radius-lg); }
+.rounded-modern-lg { border-radius: var(--radius-2xl); }
+.rounded-modern-full { border-radius: var(--radius-full); }
+
+.shadow-modern { box-shadow: var(--shadow-md); }
+.shadow-modern-lg { box-shadow: var(--shadow-xl); }
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+/* Spacing Utilities */
+.p-modern { padding: var(--spacing-xl); }
+.p-modern-sm { padding: var(--spacing-lg); }
+.p-modern-lg { padding: var(--spacing-2xl); }
+
+.m-modern { margin: var(--spacing-xl); }
+.mb-modern { margin-bottom: var(--spacing-xl); }
+.mt-modern { margin-top: var(--spacing-xl); }
+
+/* ========================================
+   RESPONSIVE GRID SYSTEM
+   ======================================== */
+.grid-modern {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 767px) {
+    .grid-cols-2,
+    .grid-cols-3,
+    .grid-cols-4 {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .grid-cols-3,
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+   EXISTING COMPONENT ENHANCEMENTS
+   ======================================== */
+/* Enhance existing Bootstrap components */
+.card {
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+}
+
+.btn {
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.form-control,
+.form-select {
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* ========================================
+   MOBILE-FIRST RESPONSIVE BREAKPOINTS
+   ======================================== */
+@media (max-width: 576px) {
+    .page-title-modern {
+        font-size: 1.5rem;
+    }
+    
+    .btn-modern {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-modern {
+        padding: var(--spacing-lg);
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}

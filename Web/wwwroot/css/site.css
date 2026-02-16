@@ -40,6 +40,36 @@ main {
   flex: 1 0 auto;
 }
 
+footer {
+  margin-top: auto;
+}
+
+.footer-custom {
+  background-color: #f8fafc;
+  transition: background-color 0.2s ease;
+}
+
+html[data-bs-theme="dark"] .footer-custom {
+  background-color: #1e293b;
+}
+
+.footer-link {
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #0d6efd;
+}
+
+html[data-bs-theme="dark"] .footer-link {
+  color: #94a3b8;
+}
+
+html[data-bs-theme="dark"] .footer-link:hover {
+  color: #60a5fa;
+}
+
 .navbar-brand {
   letter-spacing: 0.2px;
 }
@@ -160,10 +190,6 @@ html[data-bs-theme="dark"] .theme-toggle:hover {
 .form-control:focus,
 .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(13, 110, 253, 0.35);
-}
-
-footer {
-  margin-top: auto;
 }
 
 .form-floating > .form-control-plaintext::placeholder,
