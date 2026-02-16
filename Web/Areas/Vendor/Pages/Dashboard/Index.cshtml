@@ -1,0 +1,167 @@
+@page
+@model Web.Areas.Vendor.Pages.Dashboard.IndexModel
+@{
+    ViewData["Title"] = "Vendor Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">
+                <i class="bi bi-shop"></i> Welcome, @Model.VendorName
+            </h1>
+            <p class="text-muted">Manage your products, orders, and sales</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Products</h6>
+                            <h2 class="card-title mb-0">@Model.TotalProducts</h2>
+                            <small class="text-success">@Model.ActiveProducts active</small>
+                        </div>
+                        <div class="text-primary">
+                            <i class="bi bi-box-seam" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-area="Vendor" asp-page="/Products/Index" class="btn btn-sm btn-outline-primary">
+                        Manage Products
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
+                            <h2 class="card-title mb-0">@Model.TotalOrders</h2>
+                            <small class="text-warning">@Model.PendingOrders pending</small>
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-cart-check" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-area="Vendor" asp-page="/Orders/Index" class="btn btn-sm btn-outline-success">
+                        View Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Revenue</h6>
+                            <h2 class="card-title mb-0">?@Model.TotalRevenue.ToString("N2")</h2>
+                            <small class="text-info">This month: ?@Model.MonthlyRevenue.ToString("N2")</small>
+                        </div>
+                        <div class="text-info">
+                            <i class="bi bi-currency-rupee" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-area="Vendor" asp-page="/Reports/Sales" class="btn btn-sm btn-outline-info">
+                        View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Low Stock Items</h6>
+                            <h2 class="card-title mb-0">@Model.LowStockCount</h2>
+                            <small class="text-danger">Requires attention</small>
+                        </div>
+                        <div class="text-warning">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-area="Vendor" asp-page="/Products/Index" asp-route-filter="lowstock" class="btn btn-sm btn-outline-warning">
+                        Check Stock
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning-fill text-warning"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-area="Vendor" asp-page="/Products/Create" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle"></i> Add New Product
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-area="Vendor" asp-page="/Orders/Index" class="btn btn-success w-100">
+                                <i class="bi bi-list-check"></i> Process Orders
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-area="Vendor" asp-page="/Buyers/Index" class="btn btn-info w-100">
+                                <i class="bi bi-people"></i> Manage Buyers
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-area="Vendor" asp-page="/Settings/Index" class="btn btn-secondary w-100">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Recent orders and product updates will appear here.</p>
+                    <a asp-area="Vendor" asp-page="/Orders/Index" class="btn btn-sm btn-outline-primary">
+                        View All Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+}

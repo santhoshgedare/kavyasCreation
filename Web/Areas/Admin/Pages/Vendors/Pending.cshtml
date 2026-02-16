@@ -1,0 +1,131 @@
+@page
+@model Web.Areas.Admin.Pages.Vendors.PendingModel
+@{
+    ViewData["Title"] = "Pending Vendor Approvals";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">
+                <i class="bi bi-hourglass-split"></i> Pending Vendor Approvals
+            </h1>
+            <p class="text-muted">Review and approve vendor registration applications</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.PendingVendors.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.PendingVendors)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shop"></i> @item.Vendor.CompanyName
+                            </h5>
+                            <small class="text-muted">
+                                Applied: @item.Vendor.CreatedAt.ToString("MMM dd, yyyy")
+                            </small>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-3 text-muted">Company Information</h6>
+                            
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Email:</dt>
+                                <dd class="col-sm-8"><small>@item.Vendor.ContactEmail</small></dd>
+
+                                @if (!string.IsNullOrEmpty(item.Vendor.ContactPhone))
+                                {
+                                    <dt class="col-sm-4">Phone:</dt>
+                                    <dd class="col-sm-8"><small>@item.Vendor.ContactPhone</small></dd>
+                                }
+
+                                @if (!string.IsNullOrEmpty(item.Vendor.TaxId))
+                                {
+                                    <dt class="col-sm-4">Tax ID:</dt>
+                                    <dd class="col-sm-8"><small><code>@item.Vendor.TaxId</code></small></dd>
+                                }
+
+                                @if (!string.IsNullOrEmpty(item.Vendor.City))
+                                {
+                                    <dt class="col-sm-4">Location:</dt>
+                                    <dd class="col-sm-8"><small>@item.Vendor.City, @item.Vendor.State</small></dd>
+                                }
+                            </dl>
+
+                            @if (!string.IsNullOrEmpty(item.Vendor.Description))
+                            {
+                                <hr>
+                                <h6 class="card-subtitle mb-2 text-muted">Description</h6>
+                                <p class="small mb-0">@item.Vendor.Description</p>
+                            }
+
+                            @if (item.AdminUser != null)
+                            {
+                                <hr>
+                                <h6 class="card-subtitle mb-2 text-muted">Admin Contact</h6>
+                                <p class="small mb-1">
+                                    <strong>@item.AdminUser.FullName</strong>
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-envelope"></i> @item.AdminUser.Email
+                                </p>
+                                @if (!string.IsNullOrEmpty(item.AdminUser.PhoneNumber))
+                                {
+                                    <p class="small mb-0">
+                                        <i class="bi bi-telephone"></i> @item.AdminUser.PhoneNumber
+                                    </p>
+                                }
+                            }
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <form method="post" asp-page-handler="Approve" class="d-inline">
+                                    <input type="hidden" name="id" value="@item.Vendor.Id" />
+                                    <button type="submit" class="btn btn-success w-100" 
+                                            onclick="return confirm('Approve this vendor? They will be able to start selling.')">
+                                        <i class="bi bi-check-circle"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="Reject" class="d-inline">
+                                    <input type="hidden" name="id" value="@item.Vendor.Id" />
+                                    <button type="submit" class="btn btn-outline-danger w-100" 
+                                            onclick="return confirm('Reject this vendor application? This action cannot be undone.')">
+                                        <i class="bi bi-x-circle"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">No Pending Approvals</h4>
+                <p class="text-muted">All vendor applications have been reviewed.</p>
+                <a asp-area="Admin" asp-page="/Vendors/Index" class="btn btn-outline-primary">
+                    View All Vendors
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+}

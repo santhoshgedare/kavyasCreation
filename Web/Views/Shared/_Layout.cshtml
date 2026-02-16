@@ -49,29 +49,90 @@
                      {
                          <li class="nav-item dropdown">
                              <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                 <i class="bi bi-gear"></i> Configure
+                                 <i class="bi bi-gear"></i> Admin
                              </a>
                              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
                                  <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                     <i class="bi bi-speedometer2"></i> Admin Dashboard
+                                     <i class="bi bi-speedometer2"></i> Dashboard
                                  </a></li>
                                  <li><hr class="dropdown-divider"></li>
                                  <li><a class="dropdown-item" asp-area="Admin" asp-page="/Products/Index">
-                                     <i class="bi bi-box-seam"></i> Manage Products
+                                     <i class="bi bi-box-seam"></i> Products
                                  </a></li>
                                  <li><a class="dropdown-item" asp-area="Admin" asp-page="/Categories/Index">
-                                     <i class="bi bi-tags"></i> Manage Categories
+                                     <i class="bi bi-tags"></i> Categories
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Inventory/Dashboard">
+                                     <i class="bi bi-archive"></i> Inventory
                                  </a></li>
                                  <li><hr class="dropdown-divider"></li>
-                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Inventory/Dashboard">
-                                     <i class="bi bi-archive"></i> Inventory Dashboard
+                                 <li><h6 class="dropdown-header">Vendor Management</h6></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Vendors/Index">
+                                     <i class="bi bi-shop"></i> Manage Vendors
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Vendors/Create">
+                                     <i class="bi bi-plus-circle"></i> Create Vendor
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Vendors/Pending">
+                                     <i class="bi bi-clock-history"></i> Pending Vendors
+                                 </a></li>
+                                 <li><hr class="dropdown-divider"></li>
+                                 <li><h6 class="dropdown-header">Buyer Management</h6></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Buyers/Index">
+                                     <i class="bi bi-building"></i> Manage Buyers
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Buyers/Create">
+                                     <i class="bi bi-plus-circle"></i> Create Buyer
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Buyers/Pending">
+                                     <i class="bi bi-clock-history"></i> Pending Buyers
                                  </a></li>
                                  <li><hr class="dropdown-divider"></li>
                                  <li><a class="dropdown-item" asp-area="Admin" asp-page="/Users/Manage">
-                                     <i class="bi bi-shield-lock"></i> User Management
+                                     <i class="bi bi-people"></i> All Users
                                  </a></li>
-                                 <li><a class="dropdown-item" asp-area="Admin" asp-page="/Users/Index">
-                                     <i class="bi bi-people"></i> User Profiles
+                             </ul>
+                         </li>
+                     }
+                     @if (User.IsInRole("VendorAdmin") || User.IsInRole("VendorUser"))
+                     {
+                         <li class="nav-item dropdown">
+                             <a class="nav-link dropdown-toggle" href="#" id="vendorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                 <i class="bi bi-shop"></i> Vendor
+                             </a>
+                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="vendorDropdown">
+                                 <li><a class="dropdown-item" asp-area="Vendor" asp-page="/Dashboard/Index">
+                                     <i class="bi bi-speedometer2"></i> Dashboard
+                                 </a></li>
+                                 <li><hr class="dropdown-divider"></li>
+                                 <li><a class="dropdown-item" asp-area="Vendor" asp-page="/Products/Index">
+                                     <i class="bi bi-box-seam"></i> My Products
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Vendor" asp-page="/Orders/Index">
+                                     <i class="bi bi-cart-check"></i> Orders
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Vendor" asp-page="/Users/Index">
+                                     <i class="bi bi-people"></i> Team Members
+                                 </a></li>
+                             </ul>
+                         </li>
+                     }
+                     @if (User.IsInRole("BuyerAdmin") || User.IsInRole("BuyerUser"))
+                     {
+                         <li class="nav-item dropdown">
+                             <a class="nav-link dropdown-toggle" href="#" id="buyerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                 <i class="bi bi-building"></i> Buyer
+                             </a>
+                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="buyerDropdown">
+                                 <li><a class="dropdown-item" asp-area="Buyer" asp-page="/Dashboard/Index">
+                                     <i class="bi bi-speedometer2"></i> Dashboard
+                                 </a></li>
+                                 <li><hr class="dropdown-divider"></li>
+                                 <li><a class="dropdown-item" asp-area="Buyer" asp-page="/Orders/Index">
+                                     <i class="bi bi-cart-check"></i> Company Orders
+                                 </a></li>
+                                 <li><a class="dropdown-item" asp-area="Buyer" asp-page="/Users/Index">
+                                     <i class="bi bi-people"></i> Team Members
                                  </a></li>
                              </ul>
                          </li>

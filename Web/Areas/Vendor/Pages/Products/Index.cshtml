@@ -1,0 +1,183 @@
+@page
+@model Web.Areas.Vendor.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "My Products";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3">
+                <i class="bi bi-box-seam"></i> My Products
+            </h1>
+            <p class="text-muted">Manage your product catalog</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-area="Vendor" asp-page="/Products/Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New Product
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert @(Model.StatusMessage.StartsWith("Error") ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link @(string.IsNullOrEmpty(Model.CurrentFilter) ? "active" : "")" 
+               asp-area="Vendor" asp-page="/Products/Index">
+                All Products (@Model.Products.Count)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.CurrentFilter == "active" ? "active" : "")" 
+               asp-area="Vendor" asp-page="/Products/Index" asp-route-filter="active">
+                Active
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.CurrentFilter == "inactive" ? "active" : "")" 
+               asp-area="Vendor" asp-page="/Products/Index" asp-route-filter="inactive">
+                Inactive
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-warning @(Model.CurrentFilter == "lowstock" ? "active" : "")" 
+               asp-area="Vendor" asp-page="/Products/Index" asp-route-filter="lowstock">
+                <i class="bi bi-exclamation-triangle"></i> Low Stock
+            </a>
+        </li>
+    </ul>
+
+    @if (Model.Products.Any())
+    {
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">Image</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th style="width: 200px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model.Products)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (product.Images?.Any() == true)
+                                        {
+                                            <img src="@product.Images.First().Url" alt="@product.Name" 
+                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@product.Name</strong>
+                                        @if (product.Stock < 10)
+                                        {
+                                            <br><small class="text-warning"><i class="bi bi-exclamation-triangle"></i> Low stock</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (product.Category != null)
+                                        {
+                                            <span class="badge bg-secondary">@product.Category.Name</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>?@product.Price.ToString("N2")</strong>
+                                    </td>
+                                    <td>
+                                        @if (product.Stock < 10)
+                                        {
+                                            <span class="badge bg-warning text-dark">@product.Stock</span>
+                                        }
+                                        else if (product.Stock < 1)
+                                        {
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">@product.Stock</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!product.IsDeleted)
+                                        {
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-area="Vendor" asp-page="/Products/Edit" asp-route-id="@product.Id" 
+                                               class="btn btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-area="Store" asp-page="/Catalog/Details" asp-route-id="@product.Id" 
+                                               class="btn btn-outline-info" title="View" target="_blank">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-area="Vendor" asp-page="/Products/Delete" asp-route-id="@product.Id" 
+                                               class="btn btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-box-seam text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">No Products Found</h4>
+                <p class="text-muted">
+                    @if (string.IsNullOrEmpty(Model.CurrentFilter))
+                    {
+                        <text>You haven't added any products yet.</text>
+                    }
+                    else
+                    {
+                        <text>No products match the selected filter.</text>
+                    }
+                </p>
+                <a asp-area="Vendor" asp-page="/Products/Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Your First Product
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+}
