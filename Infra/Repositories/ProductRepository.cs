@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Interfaces;
+using Core.Models;
 using Infra.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,11 +24,9 @@ namespace Infra.Repositories
             .AsNoTracking()
             .ToListAsync();
 
-        public async Task<IReadOnlyList<Product>> ListByCategoryAsync(Guid? categoryId, string? search)
+        public async Task<IReadOnlyList<CatalogProductDto>> ListByCategoryAsync(Guid? categoryId, string? search)
         {
-            var query = _db.Products.Include(p => p.Category)
-                .Include(p => p.Images.OrderBy(i => i.SortOrder))
-                .Include(p => p.Specifications)
+            var query = _db.Products
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -42,7 +41,52 @@ namespace Infra.Repositories
                 query = query.Where(p => EF.Functions.Like(p.Name, term) || (p.Description != null && EF.Functions.Like(p.Description, term)));
             }
 
-            return await query.ToListAsync();
+            return await query
+                .Select(p => new CatalogProductDto(
+                    p.Id,
+                    p.Name,
+                    p.Description,
+                    p.Price,
+                    p.Stock - p.ReservedStock,
+                    p.Category != null ? p.Category.Name : null,
+                    p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault()))
+                .ToListAsync();
+        }
+
+        public async Task<(IReadOnlyList<CatalogProductDto> Products, int TotalCount)> SearchCatalogAsync(string? search, Guid? categoryId, int page, int pageSize)
+        {
+            var query = _db.Products
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (categoryId.HasValue && categoryId != Guid.Empty)
+            {
+                query = query.Where(p => p.CategoryId == categoryId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search}%";
+                query = query.Where(p => EF.Functions.Like(p.Name, term) || (p.Description != null && EF.Functions.Like(p.Description, term)));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .OrderBy(p => p.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new CatalogProductDto(
+                    p.Id,
+                    p.Name,
+                    p.Description,
+                    p.Price,
+                    p.Stock - p.ReservedStock,
+                    p.Category != null ? p.Category.Name : null,
+                    p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault()))
+                .ToListAsync();
+
+            return (products, totalCount);
         }
 
         public async Task<(IReadOnlyList<Product> Products, int TotalCount)> SearchAsync(string? search, Guid? categoryId, decimal? minPrice, decimal? maxPrice, int? minRating, bool? inStock, string? sortBy, int page, int pageSize)

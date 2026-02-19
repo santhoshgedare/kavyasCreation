@@ -43,15 +43,42 @@ namespace Web.Areas.Store.Pages.Cart
             }
         }
 
-        public IActionResult OnPostUpdate(Guid productId, int quantity)
+        public async Task<IActionResult> OnPostUpdateAsync(Guid productId, int quantity)
         {
+            if (quantity < 1)
+            {
+                TempData["WarningMessage"] = "Quantity must be at least 1.";
+                return RedirectToPage();
+            }
+
+            var available = await _db.Products
+                .Where(p => p.Id == productId)
+                .Select(p => p.AvailableStock)
+                .FirstOrDefaultAsync();
+
+            if (available <= 0)
+            {
+                TempData["WarningMessage"] = "This item is currently out of stock.";
+                _cartService.RemoveItem(productId);
+                return RedirectToPage();
+            }
+
+            if (quantity > available)
+            {
+                _cartService.UpdateQuantity(productId, available);
+                TempData["WarningMessage"] = $"Only {available} available. Quantity updated.";
+                return RedirectToPage();
+            }
+
             _cartService.UpdateQuantity(productId, quantity);
+            TempData["SuccessMessage"] = "Cart updated.";
             return RedirectToPage();
         }
 
         public IActionResult OnPostRemove(Guid productId)
         {
             _cartService.RemoveItem(productId);
+            TempData["InfoMessage"] = "Item removed from cart.";
             return RedirectToPage();
         }
     }

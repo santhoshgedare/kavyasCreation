@@ -37,6 +37,12 @@ namespace Web.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public IActionResult DataDeletion()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

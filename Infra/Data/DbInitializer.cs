@@ -1,4 +1,5 @@
 using Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Data
 {
@@ -7,9 +8,16 @@ namespace Infra.Data
         public static async Task SeedAsync(AppDbContext db)
         {
             await db.Database.EnsureCreatedAsync();
+            const string clonePrefix = "[SeedClone]";
 
             if (db.Products.Any())
             {
+                if (await db.Products.AnyAsync(p => p.Name.StartsWith(clonePrefix)))
+                {
+                    return;
+                }
+
+                await AddClonedProductsAsync(db, clonePrefix, 100);
                 return;
             }
 
@@ -77,6 +85,85 @@ namespace Infra.Data
                 new ProductSpecification { Id = Guid.NewGuid(), ProductId = watch.Id, Key = "Display", Value = "AMOLED" },
                 new ProductSpecification { Id = Guid.NewGuid(), ProductId = backpack.Id, Key = "Capacity", Value = "22L" }
             );
+
+            await db.SaveChangesAsync();
+
+            await AddClonedProductsAsync(db, clonePrefix, 100);
+        }
+
+        private static async Task AddClonedProductsAsync(AppDbContext db, string clonePrefix, int cloneCount)
+        {
+            var sourceProducts = await db.Products
+                .Include(p => p.Images)
+                .Include(p => p.Specifications)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (sourceProducts.Count == 0)
+            {
+                return;
+            }
+
+            var newProducts = new List<Product>(cloneCount);
+            var newImages = new List<ProductImage>();
+            var newSpecifications = new List<ProductSpecification>();
+
+            for (var i = 0; i < cloneCount; i++)
+            {
+                var source = sourceProducts[i % sourceProducts.Count];
+                var newProductId = Guid.NewGuid();
+                var clone = new Product
+                {
+                    Id = newProductId,
+                    CategoryId = source.CategoryId,
+                    VendorId = source.VendorId,
+                    Name = $"{clonePrefix} {source.Name} {i + 1}",
+                    Description = source.Description,
+                    Price = source.Price,
+                    Stock = source.Stock,
+                    ReservedStock = 0,
+                    ReorderLevel = source.ReorderLevel,
+                    ReorderQuantity = source.ReorderQuantity,
+                    IsFeatured = source.IsFeatured,
+                    AverageRating = source.AverageRating,
+                    ReviewCount = 0
+                };
+
+                newProducts.Add(clone);
+
+                foreach (var image in source.Images.OrderBy(i => i.SortOrder))
+                {
+                    newImages.Add(new ProductImage
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = newProductId,
+                        Url = image.Url,
+                        SortOrder = image.SortOrder
+                    });
+                }
+
+                foreach (var spec in source.Specifications)
+                {
+                    newSpecifications.Add(new ProductSpecification
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = newProductId,
+                        Key = spec.Key,
+                        Value = spec.Value
+                    });
+                }
+            }
+
+            db.Products.AddRange(newProducts);
+            if (newImages.Count > 0)
+            {
+                db.ProductImages.AddRange(newImages);
+            }
+
+            if (newSpecifications.Count > 0)
+            {
+                db.ProductSpecifications.AddRange(newSpecifications);
+            }
 
             await db.SaveChangesAsync();
         }

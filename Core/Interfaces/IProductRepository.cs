@@ -6,7 +6,8 @@ namespace Core.Interfaces
     {
         Task<Product?> GetByIdAsync(Guid id);
         Task<IReadOnlyList<Product>> ListAsync();
-        Task<IReadOnlyList<Product>> ListByCategoryAsync(Guid? categoryId, string? search);
+        Task<IReadOnlyList<Core.Models.CatalogProductDto>> ListByCategoryAsync(Guid? categoryId, string? search);
+        Task<(IReadOnlyList<Core.Models.CatalogProductDto> Products, int TotalCount)> SearchCatalogAsync(string? search, Guid? categoryId, int page, int pageSize);
         Task<(IReadOnlyList<Product> Products, int TotalCount)> SearchAsync(string? search, Guid? categoryId, decimal? minPrice, decimal? maxPrice, int? minRating, bool? inStock, string? sortBy, int page, int pageSize);
         Task<IReadOnlyList<Product>> GetFeaturedAsync(int count);
         Task<IReadOnlyList<Product>> ListDeletedAsync();

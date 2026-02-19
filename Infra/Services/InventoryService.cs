@@ -45,72 +45,76 @@ namespace Infra.Services
         /// <returns>The created stock reservation, or null if insufficient stock or concurrency conflict.</returns>
         public async Task<StockReservation?> ReserveStockAsync(Guid productId, string userId, int quantity, int expirationMinutes = 15)
         {
-            using var transaction = await _db.Database.BeginTransactionAsync();
-            try
+            var strategy = _db.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                // Single query - tracked for updates
-                var product = await _db.Products.FindAsync(productId);
-                if (product is null || product.AvailableStock < quantity)
+                await using var transaction = await _db.Database.BeginTransactionAsync();
+                try
                 {
-                    _logger.LogWarning("Insufficient stock for product {ProductId}. Requested: {Quantity}, Available: {Available}", 
-                        productId, quantity, product?.AvailableStock ?? 0);
+                    // Single query - tracked for updates
+                    var product = await _db.Products.FindAsync(productId);
+                    if (product is null || product.AvailableStock < quantity)
+                    {
+                        _logger.LogWarning("Insufficient stock for product {ProductId}. Requested: {Quantity}, Available: {Available}",
+                            productId, quantity, product?.AvailableStock ?? 0);
+                        return null;
+                    }
+
+                    var stockBefore = product.Stock;
+                    product.ReservedStock += quantity;
+
+                    var reservation = new StockReservation
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = productId,
+                        UserId = userId,
+                        Quantity = quantity,
+                        ReservedAt = DateTime.UtcNow,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(expirationMinutes),
+                        IsCommitted = false,
+                        IsCancelled = false
+                    };
+
+                    _db.StockReservations.Add(reservation);
+
+                    // OPTIMIZED: Use already-loaded product instead of querying again
+                    var movement = new StockMovement
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = productId,
+                        Quantity = -quantity,
+                        StockBefore = stockBefore,
+                        StockAfter = product.Stock,
+                        MovementType = StockMovementTypes.Reservation,
+                        ReferenceId = reservation.Id.ToString(),
+                        Notes = $"Reserved {quantity} units for user {userId}",
+                        PerformedBy = userId,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _db.StockMovements.Add(movement);
+
+                    await _db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation("Stock reserved: {Quantity} units of product {ProductId} for user {UserId}",
+                        quantity, productId, userId);
+
+                    return reservation;
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Concurrency conflict while reserving stock for product {ProductId}", productId);
                     return null;
                 }
-
-                var stockBefore = product.Stock;
-                product.ReservedStock += quantity;
-
-                var reservation = new StockReservation
+                catch (Exception ex)
                 {
-                    Id = Guid.NewGuid(),
-                    ProductId = productId,
-                    UserId = userId,
-                    Quantity = quantity,
-                    ReservedAt = DateTime.UtcNow,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(expirationMinutes),
-                    IsCommitted = false,
-                    IsCancelled = false
-                };
-
-                _db.StockReservations.Add(reservation);
-
-                // OPTIMIZED: Use already-loaded product instead of querying again
-                var movement = new StockMovement
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = productId,
-                    Quantity = -quantity,
-                    StockBefore = stockBefore,
-                    StockAfter = product.Stock,
-                    MovementType = StockMovementTypes.Reservation,
-                    ReferenceId = reservation.Id.ToString(),
-                    Notes = $"Reserved {quantity} units for user {userId}",
-                    PerformedBy = userId,
-                    CreatedAt = DateTime.UtcNow
-                };
-                
-                _db.StockMovements.Add(movement);
-
-                await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                _logger.LogInformation("Stock reserved: {Quantity} units of product {ProductId} for user {UserId}", 
-                    quantity, productId, userId);
-
-                return reservation;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Concurrency conflict while reserving stock for product {ProductId}", productId);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error reserving stock for product {ProductId}", productId);
-                throw;
-            }
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error reserving stock for product {ProductId}", productId);
+                    throw;
+                }
+            });
         }
 
         /// <summary>
@@ -122,84 +126,92 @@ namespace Infra.Services
         /// <returns>True if successfully committed, false otherwise.</returns>
         public async Task<bool> CommitReservationAsync(Guid reservationId, Guid orderId)
         {
-            using var transaction = await _db.Database.BeginTransactionAsync();
-            try
+            var strategy = _db.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var reservation = await _db.StockReservations
-                    .Include(r => r.Product)
-                    .FirstOrDefaultAsync(r => r.Id == reservationId);
-
-                if (reservation is null || reservation.IsCommitted || reservation.IsCancelled)
+                await using var transaction = await _db.Database.BeginTransactionAsync();
+                try
                 {
-                    _logger.LogWarning("Invalid reservation {ReservationId} for commit", reservationId);
-                    return false;
-                }
+                    var reservation = await _db.StockReservations
+                        .Include(r => r.Product)
+                        .FirstOrDefaultAsync(r => r.Id == reservationId);
 
-                if (reservation.Product is null)
+                    if (reservation is null || reservation.IsCommitted || reservation.IsCancelled)
+                    {
+                        _logger.LogWarning("Invalid reservation {ReservationId} for commit", reservationId);
+                        return false;
+                    }
+
+                    if (reservation.Product is null)
+                    {
+                        _logger.LogError("Product not found for reservation {ReservationId}", reservationId);
+                        return false;
+                    }
+
+                    reservation.IsCommitted = true;
+                    reservation.OrderId = orderId;
+
+                    reservation.Product.ReservedStock -= reservation.Quantity;
+                    reservation.Product.Stock -= reservation.Quantity;
+
+                    await RecordStockMovementAsync(reservation.ProductId, -reservation.Quantity, StockMovementTypes.Sale,
+                        reservation.UserId, orderId.ToString(), $"Order {orderId} committed");
+
+                    await _db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation("Reservation {ReservationId} committed for order {OrderId}", reservationId, orderId);
+                    return true;
+                }
+                catch (Exception ex)
                 {
-                    _logger.LogError("Product not found for reservation {ReservationId}", reservationId);
-                    return false;
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error committing reservation {ReservationId}", reservationId);
+                    throw;
                 }
-
-                reservation.IsCommitted = true;
-                reservation.OrderId = orderId;
-                
-                reservation.Product.ReservedStock -= reservation.Quantity;
-                reservation.Product.Stock -= reservation.Quantity;
-
-                await RecordStockMovementAsync(reservation.ProductId, -reservation.Quantity, StockMovementTypes.Sale, 
-                    reservation.UserId, orderId.ToString(), $"Order {orderId} committed");
-
-                await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                _logger.LogInformation("Reservation {ReservationId} committed for order {OrderId}", reservationId, orderId);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error committing reservation {ReservationId}", reservationId);
-                throw;
-            }
+            });
         }
 
         public async Task<bool> CancelReservationAsync(Guid reservationId)
         {
-            using var transaction = await _db.Database.BeginTransactionAsync();
-            try
+            var strategy = _db.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var reservation = await _db.StockReservations
-                    .Include(r => r.Product)
-                    .FirstOrDefaultAsync(r => r.Id == reservationId);
-
-                if (reservation is null || reservation.IsCommitted || reservation.IsCancelled)
+                await using var transaction = await _db.Database.BeginTransactionAsync();
+                try
                 {
-                    return false;
-                }
+                    var reservation = await _db.StockReservations
+                        .Include(r => r.Product)
+                        .FirstOrDefaultAsync(r => r.Id == reservationId);
 
-                if (reservation.Product is not null)
+                    if (reservation is null || reservation.IsCommitted || reservation.IsCancelled)
+                    {
+                        return false;
+                    }
+
+                    if (reservation.Product is not null)
+                    {
+                        reservation.Product.ReservedStock -= reservation.Quantity;
+                    }
+
+                    reservation.IsCancelled = true;
+
+                    await RecordStockMovementAsync(reservation.ProductId, reservation.Quantity, StockMovementTypes.Release,
+                        reservation.UserId, reservationId.ToString(), "Reservation cancelled");
+
+                    await _db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation("Reservation {ReservationId} cancelled", reservationId);
+                    return true;
+                }
+                catch (Exception ex)
                 {
-                    reservation.Product.ReservedStock -= reservation.Quantity;
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error cancelling reservation {ReservationId}", reservationId);
+                    throw;
                 }
-
-                reservation.IsCancelled = true;
-
-                await RecordStockMovementAsync(reservation.ProductId, reservation.Quantity, StockMovementTypes.Release, 
-                    reservation.UserId, reservationId.ToString(), "Reservation cancelled");
-
-                await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                _logger.LogInformation("Reservation {ReservationId} cancelled", reservationId);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error cancelling reservation {ReservationId}", reservationId);
-                throw;
-            }
+            });
         }
 
         public async Task ReleaseExpiredReservationsAsync()
@@ -230,40 +242,44 @@ namespace Infra.Services
 
         public async Task<bool> AdjustStockAsync(Guid productId, int quantity, string movementType, string performedBy, string? referenceId = null, string? notes = null)
         {
-            using var transaction = await _db.Database.BeginTransactionAsync();
-            try
+            var strategy = _db.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var product = await _db.Products.FindAsync(productId);
-                if (product is null)
+                await using var transaction = await _db.Database.BeginTransactionAsync();
+                try
                 {
-                    return false;
+                    var product = await _db.Products.FindAsync(productId);
+                    if (product is null)
+                    {
+                        return false;
+                    }
+
+                    var stockBefore = product.Stock;
+                    product.Stock += quantity;
+
+                    if (product.Stock < 0)
+                    {
+                        _logger.LogError("Stock adjustment would result in negative stock for product {ProductId}", productId);
+                        return false;
+                    }
+
+                    await RecordStockMovementAsync(productId, quantity, movementType, performedBy, referenceId, notes, stockBefore);
+
+                    await _db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation("Stock adjusted for product {ProductId}: {Quantity} ({MovementType})",
+                        productId, quantity, movementType);
+
+                    return true;
                 }
-
-                var stockBefore = product.Stock;
-                product.Stock += quantity;
-
-                if (product.Stock < 0)
+                catch (Exception ex)
                 {
-                    _logger.LogError("Stock adjustment would result in negative stock for product {ProductId}", productId);
-                    return false;
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error adjusting stock for product {ProductId}", productId);
+                    throw;
                 }
-
-                await RecordStockMovementAsync(productId, quantity, movementType, performedBy, referenceId, notes, stockBefore);
-
-                await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                _logger.LogInformation("Stock adjusted for product {ProductId}: {Quantity} ({MovementType})", 
-                    productId, quantity, movementType);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error adjusting stock for product {ProductId}", productId);
-                throw;
-            }
+            });
         }
 
         public async Task<IReadOnlyList<StockMovement>> GetStockHistoryAsync(Guid productId, int count = 50)

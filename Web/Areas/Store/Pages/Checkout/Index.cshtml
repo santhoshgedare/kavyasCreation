@@ -45,7 +45,7 @@
     {
         <div class="row g-4">
             <div class="col-lg-8">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h5 class="card-title">Order Summary</h5>
                         <ul class="list-group list-group-flush">
@@ -53,19 +53,51 @@
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>@item.Name <small class="text-muted">x @item.Quantity</small></span>
-                                    <span>@(item.Price * item.Quantity).ToString("C")</span>
+                                    <span>@((item.Price * item.Quantity).ToString("C"))</span>
                                 </li>
                             }
                         </ul>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Shipping Address</h5>
+                        @if (Model.ShippingAddress is null)
+                        {
+                            <div class="alert alert-warning mb-0">
+                                No shipping address found. Please add one before checkout.
+                                <a class="alert-link" asp-area="Account" asp-page="/Profile/Addresses">Manage addresses</a>.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted">
+                                <div class="fw-semibold">@Model.ShippingAddress.Label</div>
+                                <div>@Model.ShippingAddress.FullAddress</div>
+                                @if (!string.IsNullOrWhiteSpace(Model.ShippingAddress.PhoneNumber))
+                                {
+                                    <div>@Model.ShippingAddress.PhoneNumber</div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="card shadow-sm">
                     <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-semibold">Subtotal</span>
+                            <span>@Model.Total.ToString("C")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-semibold">Shipping</span>
+                            <span>@Model.ShippingCharge.ToString("C")</span>
+                        </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span class="fw-semibold">Total</span>
-                            <span class="fw-bold">@Model.Total.ToString("C")</span>
+                            <span class="fw-bold">@Model.GrandTotal.ToString("C")</span>
                         </div>
                         <form method="post">
                             <button class="btn btn-success w-100" type="submit">Continue to Payment</button>

@@ -90,7 +90,7 @@
                                 </form>
                             </td>
                             <td class="text-end">@item.Price.ToString("C")</td>
-                            <td class="text-end">@(item.Price * item.Quantity).ToString("C")</td>
+                            <td class="text-end">@((item.Price * item.Quantity).ToString("C"))</td>
                             <td class="text-end">
                                 <form method="post" asp-page-handler="Remove" class="d-inline">
                                     <input type="hidden" name="productId" value="@item.ProductId" />

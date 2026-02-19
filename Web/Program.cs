@@ -122,12 +122,14 @@ builder.Services.AddOutputCache(options =>
     // Default policy: cache for 60 seconds
     options.AddBasePolicy(builder => builder
         .Expire(TimeSpan.FromSeconds(60))
+        .SetVaryByHeader("Cookie")
         .Tag("default"));
     
     // Catalog pages: cache for 2 minutes, vary by query string
     options.AddPolicy("catalog", builder => builder
         .Expire(TimeSpan.FromMinutes(2))
         .SetVaryByQuery("categoryId", "search")
+        .SetVaryByHeader("Cookie")
         .Tag("catalog"));
 });
 

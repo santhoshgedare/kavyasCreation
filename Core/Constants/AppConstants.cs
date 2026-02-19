@@ -76,6 +76,11 @@ namespace Core.Constants
         /// Default page size for paginated results.
         /// </summary>
         public const int DefaultPageSize = 20;
+
+        /// <summary>
+        /// Standard shipping charge applied to orders.
+        /// </summary>
+        public const decimal StandardShippingCharge = 50m;
         
         /// <summary>
         /// Maximum page size for paginated results.

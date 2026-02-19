@@ -1,4 +1,5 @@
 using Core.Entities;
+using Core.Models;
 using Core.Interfaces;
 using Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,7 @@ namespace Web.Areas.Store.Pages.Catalog
         private readonly IUnitOfWork _unitOfWork;
         private readonly CartService _cartService;
         private readonly ILogger<IndexModel> _logger;
+        private const int PageSize = 12;
 
         public IndexModel(IUnitOfWork unitOfWork, CartService cartService, ILogger<IndexModel> logger)
         {
@@ -22,24 +24,50 @@ namespace Web.Areas.Store.Pages.Catalog
             _logger = logger;
         }
 
-        public IReadOnlyList<Product> Products { get; private set; } = [];
+        public IReadOnlyList<CatalogProductDto> Products { get; private set; } = [];
         public IReadOnlyList<Category> Categories { get; private set; } = [];
         public int CartCount { get; private set; }
+        public int TotalCount { get; private set; }
+        public int TotalPages { get; private set; }
+        public int CurrentPage { get; private set; }
         [BindProperty(SupportsGet = true)]
         public Guid? CategoryId { get; set; }
         [BindProperty(SupportsGet = true)]
         public string? Search { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
         public async Task OnGetAsync()
         {
             try
             {
-                // Set response headers to prevent aggressive caching
-                Response.Headers["Cache-Control"] = "public, max-age=30";
+                // Prevent caching for authenticated users (cart count is user-specific)
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    Response.Headers["Cache-Control"] = "private, no-store, no-cache";
+                    Response.Headers["Pragma"] = "no-cache";
+                    Response.Headers["Expires"] = "0";
+                }
+                else
+                {
+                    Response.Headers["Cache-Control"] = "public, max-age=30";
+                }
+
                 Response.Headers["Vary"] = "Cookie"; // Vary by theme cookie
                 
+                if (PageNumber < 1)
+                {
+                    PageNumber = 1;
+                }
+
+                CurrentPage = PageNumber;
+
                 Categories = await _unitOfWork.Categories.ListAsync();
-                Products = await _unitOfWork.Products.ListByCategoryAsync(CategoryId, Search);
+                var (products, totalCount) = await _unitOfWork.Products.SearchCatalogAsync(Search, CategoryId, CurrentPage, PageSize);
+                Products = products;
+                TotalCount = totalCount;
+                TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
                 
                 // Only get cart count if user is authenticated
                 if (User.Identity?.IsAuthenticated == true)
@@ -64,25 +92,25 @@ namespace Web.Areas.Store.Pages.Catalog
                 var product = await _unitOfWork.Products.GetByIdAsync(productId);
                 if (product is null)
                 {
-                    TempData["Error"] = "Product not found";
+                    TempData["ErrorMessage"] = "Product not found.";
                     return RedirectToPage();
                 }
 
                 if (product.AvailableStock < 1)
                 {
-                    TempData["Error"] = "Product is out of stock";
+                    TempData["WarningMessage"] = "Product is out of stock.";
                     return RedirectToPage();
                 }
 
                 _cartService.AddItem(product);
-                TempData["Success"] = $"{product.Name} added to cart";
+                TempData["SuccessMessage"] = $"{product.Name} added to cart.";
 
                 return RedirectToPage();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding product {ProductId} to cart", productId);
-                TempData["Error"] = "Unable to add item to cart. Please try again.";
+                TempData["ErrorMessage"] = "Unable to add item to cart. Please try again.";
                 return RedirectToPage();
             }
         }
