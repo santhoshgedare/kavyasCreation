@@ -48,31 +48,33 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Configure external authentication providers
-builder.Services.AddAuthentication()
-    .AddGoogle(googleOptions =>
+var authBuilder = builder.Services.AddAuthentication();
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    authBuilder.AddGoogle(googleOptions =>
     {
-        var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-        var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-        
-        if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
-        {
-            googleOptions.ClientId = googleClientId;
-            googleOptions.ClientSecret = googleClientSecret;
-            googleOptions.CallbackPath = "/signin-google";
-        }
-    })
-    .AddFacebook(facebookOptions =>
-    {
-        var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
-        var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
-        
-        if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
-        {
-            facebookOptions.AppId = facebookAppId;
-            facebookOptions.AppSecret = facebookAppSecret;
-            facebookOptions.CallbackPath = "/signin-facebook";
-        }
+        googleOptions.ClientId = googleClientId;
+        googleOptions.ClientSecret = googleClientSecret;
+        googleOptions.CallbackPath = "/signin-google";
     });
+}
+
+var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
+var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+
+if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
+{
+    authBuilder.AddFacebook(facebookOptions =>
+    {
+        facebookOptions.AppId = facebookAppId;
+        facebookOptions.AppSecret = facebookAppSecret;
+        facebookOptions.CallbackPath = "/signin-facebook";
+    });
+}
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
