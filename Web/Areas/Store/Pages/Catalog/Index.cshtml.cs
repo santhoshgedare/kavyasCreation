@@ -45,13 +45,13 @@ namespace Web.Areas.Store.Pages.Catalog
                 // Prevent caching for authenticated users (cart count is user-specific)
                 if (User.Identity?.IsAuthenticated == true)
                 {
-                    Response.Headers["Cache-Control"] = "private, no-store, no-cache";
+                    Response.Headers["Cache-Control"] = "private, max-age=0, must-revalidate";
                     Response.Headers["Pragma"] = "no-cache";
                     Response.Headers["Expires"] = "0";
                 }
                 else
                 {
-                    Response.Headers["Cache-Control"] = "public, max-age=30";
+                    Response.Headers["Cache-Control"] = "public, max-age=300";
                 }
 
                 Response.Headers["Vary"] = "Cookie"; // Vary by theme cookie

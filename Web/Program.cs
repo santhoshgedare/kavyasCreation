@@ -119,17 +119,15 @@ builder.Services.AddResponseCaching();
 // Add output caching for Razor Pages
 builder.Services.AddOutputCache(options =>
 {
-    // Default policy: cache for 60 seconds
+    // Don't cache catalog pages by default to avoid back button issues
+    // Instead rely on browser caching with appropriate Cache-Control headers
     options.AddBasePolicy(builder => builder
-        .Expire(TimeSpan.FromSeconds(60))
-        .SetVaryByHeader("Cookie")
+        .NoCache()
         .Tag("default"));
     
-    // Catalog pages: cache for 2 minutes, vary by query string
+    // Catalog pages: vary by query string and cookie
     options.AddPolicy("catalog", builder => builder
-        .Expire(TimeSpan.FromMinutes(2))
-        .SetVaryByQuery("categoryId", "search")
-        .SetVaryByHeader("Cookie")
+        .NoCache()
         .Tag("catalog"));
 });
 
@@ -222,7 +220,6 @@ app.UseResponseCompression();
 
 // Add response caching middleware (must be before routing)
 app.UseResponseCaching();
-app.UseOutputCache();
 
 app.UseHttpsRedirection();
 app.UseRouting();
