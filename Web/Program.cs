@@ -55,11 +55,12 @@ var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecr
 
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
 {
-    authBuilder.AddGoogle(googleOptions =>
+    authBuilder.AddGoogle("Google", "Google", googleOptions =>
     {
         googleOptions.ClientId = googleClientId;
         googleOptions.ClientSecret = googleClientSecret;
         googleOptions.CallbackPath = "/signin-google";
+        googleOptions.SignInScheme = IdentityConstants.ExternalScheme;
     });
 }
 
@@ -68,11 +69,12 @@ var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret
 
 if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
 {
-    authBuilder.AddFacebook(facebookOptions =>
+    authBuilder.AddFacebook("Facebook", "Facebook", facebookOptions =>
     {
         facebookOptions.AppId = facebookAppId;
         facebookOptions.AppSecret = facebookAppSecret;
         facebookOptions.CallbackPath = "/signin-facebook";
+        facebookOptions.SignInScheme = IdentityConstants.ExternalScheme;
     });
 }
 
