@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null);
     }));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+// Add Azure Blob Storage
+var azureBlobConnectionString = builder.Configuration["AzureBlob:ConnectionString"];
+if (!string.IsNullOrEmpty(azureBlobConnectionString))
+{
+    builder.Services.AddSingleton(new BlobServiceClient(azureBlobConnectionString));
+    builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+}
+else
+{
+    builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+}
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => 
 {

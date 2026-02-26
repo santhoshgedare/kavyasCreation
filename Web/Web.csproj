@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.21.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +28,5 @@
     <Folder Include="Areas\Store\Controllers\" />
     <Folder Include="Areas\Store\Views\Catalog\" />
   </ItemGroup>
-
-  
 
 </Project>

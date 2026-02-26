@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Web.Services;
 
 namespace Web.Areas.Admin.Pages.Products
 {
@@ -11,12 +12,14 @@ namespace Web.Areas.Admin.Pages.Products
     public class CreateModel : PageModel
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _environment;
+        private readonly IBlobStorageService _blobStorageService;
+        private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(IUnitOfWork unitOfWork, IWebHostEnvironment environment)
+        public CreateModel(IUnitOfWork unitOfWork, IBlobStorageService blobStorageService, ILogger<CreateModel> logger)
         {
             _unitOfWork = unitOfWork;
-            _environment = environment;
+            _blobStorageService = blobStorageService;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -50,11 +53,30 @@ namespace Web.Areas.Admin.Pages.Products
 
             Product.Id = Guid.NewGuid();
             var uploads = GetUploads();
-            if (uploads.Any())
+            
+            try
             {
-                var images = await SaveImagesAsync(uploads);
+                if (uploads.Any())
+                {
+                    var images = await SaveImagesToAzureAsync(uploads);
+                    await _unitOfWork.Products.AddAsync(Product);
+                    await _unitOfWork.Products.AddImagesAsync(Product.Id, images);
+                    
+                    if (!string.IsNullOrWhiteSpace(SpecKey) && !string.IsNullOrWhiteSpace(SpecValue))
+                    {
+                        await _unitOfWork.Products.AddSpecificationAsync(Product.Id, new ProductSpecification
+                        {
+                            Id = Guid.NewGuid(),
+                            Key = SpecKey,
+                            Value = SpecValue
+                        });
+                    }
+                    
+                    TempData["SuccessMessage"] = "Product created successfully with images!";
+                    return RedirectToPage("/Products/Index", new { area = "Admin" });
+                }
+
                 await _unitOfWork.Products.AddAsync(Product);
-                await _unitOfWork.Products.AddImagesAsync(Product.Id, images);
                 if (!string.IsNullOrWhiteSpace(SpecKey) && !string.IsNullOrWhiteSpace(SpecValue))
                 {
                     await _unitOfWork.Products.AddSpecificationAsync(Product.Id, new ProductSpecification
@@ -64,20 +86,16 @@ namespace Web.Areas.Admin.Pages.Products
                         Value = SpecValue
                     });
                 }
+                
+                TempData["SuccessMessage"] = "Product created successfully!";
                 return RedirectToPage("/Products/Index", new { area = "Admin" });
             }
-
-            await _unitOfWork.Products.AddAsync(Product);
-            if (!string.IsNullOrWhiteSpace(SpecKey) && !string.IsNullOrWhiteSpace(SpecValue))
+            catch (Exception ex)
             {
-                await _unitOfWork.Products.AddSpecificationAsync(Product.Id, new ProductSpecification
-                {
-                    Id = Guid.NewGuid(),
-                    Key = SpecKey,
-                    Value = SpecValue
-                });
+                _logger.LogError(ex, "Error creating product");
+                ModelState.AddModelError("", "Error creating product. Please try again.");
+                return Page();
             }
-            return RedirectToPage("/Products/Index", new { area = "Admin" });
         }
 
         private List<IFormFile> GetUploads()
@@ -90,10 +108,11 @@ namespace Web.Areas.Admin.Pages.Products
             return Request.Form.Files.ToList();
         }
 
-        private async Task<List<ProductImage>> SaveImagesAsync(IEnumerable<IFormFile> files)
+        /// <summary>
+        /// Uploads product images to Azure Blob Storage
+        /// </summary>
+        private async Task<List<ProductImage>> SaveImagesToAzureAsync(IEnumerable<IFormFile> files)
         {
-            var uploadsRoot = Path.Combine(_environment.WebRootPath, "uploads", "products");
-            Directory.CreateDirectory(uploadsRoot);
             var images = new List<ProductImage>();
 
             foreach (var file in files)
@@ -103,18 +122,22 @@ namespace Web.Areas.Admin.Pages.Products
                     continue;
                 }
 
-                var extension = Path.GetExtension(file.FileName);
-                var fileName = $"{Guid.NewGuid()}{extension}";
-                var filePath = Path.Combine(uploadsRoot, fileName);
-
-                await using var stream = System.IO.File.Create(filePath);
-                await file.CopyToAsync(stream);
-
-                images.Add(new ProductImage
+                try
                 {
-                    Id = Guid.NewGuid(),
-                    Url = $"/uploads/products/{fileName}"
-                });
+                    var imageUrl = await _blobStorageService.UploadAsync(file, "products");
+                    _logger.LogInformation("Image uploaded to Azure: {ImageUrl}", imageUrl);
+
+                    images.Add(new ProductImage
+                    {
+                        Id = Guid.NewGuid(),
+                        Url = imageUrl
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading image {FileName} to Azure Blob Storage", file.FileName);
+                    throw;
+                }
             }
 
             return images;

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Web.Services;
 
 namespace Web.Areas.Admin.Pages.Products
 {
@@ -11,12 +12,14 @@ namespace Web.Areas.Admin.Pages.Products
     public class EditModel : PageModel
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _environment;
+        private readonly IBlobStorageService _blobStorageService;
+        private readonly ILogger<EditModel> _logger;
 
-        public EditModel(IUnitOfWork unitOfWork, IWebHostEnvironment environment)
+        public EditModel(IUnitOfWork unitOfWork, IBlobStorageService blobStorageService, ILogger<EditModel> logger)
         {
             _unitOfWork = unitOfWork;
-            _environment = environment;
+            _blobStorageService = blobStorageService;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -58,31 +61,50 @@ namespace Web.Areas.Admin.Pages.Products
                 return Page();
             }
 
-            var uploads = GetUploads();
-            var (orderMap, newPositions) = ParseImageOrder(ImageOrder);
-
-            if (uploads.Any())
+            try
             {
-                var images = await SaveImagesAsync(uploads, newPositions);
-                await _unitOfWork.Products.AddImagesAsync(Product.Id, images);
-            }
+                var uploads = GetUploads();
+                var (orderMap, newPositions) = ParseImageOrder(ImageOrder);
 
-            if (orderMap.Count > 0)
+                if (uploads.Any())
+                {
+                    var images = await SaveImagesToAzureAsync(uploads, newPositions);
+                    await _unitOfWork.Products.AddImagesAsync(Product.Id, images);
+                }
+
+                if (orderMap.Count > 0)
+                {
+                    await _unitOfWork.Products.UpdateImageOrderAsync(Product.Id, orderMap);
+                }
+
+                await _unitOfWork.Products.UpdateAsync(Product);
+                TempData["SuccessMessage"] = "Product updated successfully!";
+                return RedirectToPage("/Products/Index", new { area = "Admin" });
+            }
+            catch (Exception ex)
             {
-                await _unitOfWork.Products.UpdateImageOrderAsync(Product.Id, orderMap);
+                _logger.LogError(ex, "Error updating product");
+                ModelState.AddModelError("", "Error updating product. Please try again.");
+                return Page();
             }
-
-            await _unitOfWork.Products.UpdateAsync(Product);
-            return RedirectToPage("/Products/Index", new { area = "Admin" });
         }
 
         public async Task<IActionResult> OnPostDeleteImageAsync(Guid id, Guid imageId)
         {
-            var image = await _unitOfWork.Products.GetImageByIdAsync(imageId);
-            if (image is not null)
+            try
             {
-                DeleteFile(image.Url);
-                await _unitOfWork.Products.RemoveImageAsync(imageId);
+                var image = await _unitOfWork.Products.GetImageByIdAsync(imageId);
+                if (image is not null)
+                {
+                    await _blobStorageService.DeleteAsync(image.Url, "products");
+                    await _unitOfWork.Products.RemoveImageAsync(imageId);
+                    TempData["SuccessMessage"] = "Image deleted successfully!";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting image");
+                TempData["ErrorMessage"] = "Error deleting image. Please try again.";
             }
 
             return RedirectToPage(new { id });
@@ -125,12 +147,12 @@ namespace Web.Areas.Admin.Pages.Products
             return Request.Form.Files.ToList();
         }
 
-        private async Task<List<ProductImage>> SaveImagesAsync(IEnumerable<IFormFile> files, IReadOnlyList<int>? sortOrders = null)
+        /// <summary>
+        /// Uploads product images to Azure Blob Storage
+        /// </summary>
+        private async Task<List<ProductImage>> SaveImagesToAzureAsync(IEnumerable<IFormFile> files, IReadOnlyList<int>? sortOrders = null)
         {
-            var uploadsRoot = Path.Combine(_environment.WebRootPath, "uploads", "products");
-            Directory.CreateDirectory(uploadsRoot);
             var images = new List<ProductImage>();
-
             var index = 0;
 
             foreach (var file in files)
@@ -140,20 +162,24 @@ namespace Web.Areas.Admin.Pages.Products
                     continue;
                 }
 
-                var extension = Path.GetExtension(file.FileName);
-                var fileName = $"{Guid.NewGuid()}{extension}";
-                var filePath = Path.Combine(uploadsRoot, fileName);
-
-                await using var stream = System.IO.File.Create(filePath);
-                await file.CopyToAsync(stream);
-
-                images.Add(new ProductImage
+                try
                 {
-                    Id = Guid.NewGuid(),
-                    Url = $"/uploads/products/{fileName}",
-                    SortOrder = sortOrders is not null && index < sortOrders.Count ? sortOrders[index] : -1
-                });
-                index++;
+                    var imageUrl = await _blobStorageService.UploadAsync(file, "products");
+                    _logger.LogInformation("Image uploaded to Azure: {ImageUrl}", imageUrl);
+
+                    images.Add(new ProductImage
+                    {
+                        Id = Guid.NewGuid(),
+                        Url = imageUrl,
+                        SortOrder = sortOrders is not null && index < sortOrders.Count ? sortOrders[index] : -1
+                    });
+                    index++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading image {FileName} to Azure Blob Storage", file.FileName);
+                    throw;
+                }
             }
 
             return images;
@@ -188,24 +214,6 @@ namespace Web.Areas.Admin.Pages.Products
             }
 
             return (orderMap, newPositions);
-        }
-
-        private void DeleteFile(string? url)
-        {
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                return;
-            }
-
-            if (url.StartsWith("/uploads/products", StringComparison.OrdinalIgnoreCase))
-            {
-                var relative = url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-                var path = Path.Combine(_environment.WebRootPath, relative);
-                if (System.IO.File.Exists(path))
-                {
-                    System.IO.File.Delete(path);
-                }
-            }
         }
     }
 }
