@@ -42,19 +42,21 @@ namespace Web.Areas.Store.Pages.Catalog
         {
             try
             {
-                // Prevent caching for authenticated users (cart count is user-specific)
+                // Use sensible caching for better back button experience
+                // Allow 5 minutes of cache to reduce server load and improve back button UX
                 if (User.Identity?.IsAuthenticated == true)
                 {
-                    Response.Headers["Cache-Control"] = "private, max-age=0, must-revalidate";
-                    Response.Headers["Pragma"] = "no-cache";
-                    Response.Headers["Expires"] = "0";
+                    // Authenticated users: cache for 5 minutes but allow revalidation
+                    // This prevents the back button from forcing a fresh request
+                    Response.Headers["Cache-Control"] = "private, max-age=300";
                 }
                 else
                 {
+                    // Anonymous users: cache for 5 minutes
                     Response.Headers["Cache-Control"] = "public, max-age=300";
                 }
 
-                Response.Headers["Vary"] = "Cookie"; // Vary by theme cookie
+                Response.Headers["Vary"] = "Cookie";
                 
                 if (PageNumber < 1)
                 {

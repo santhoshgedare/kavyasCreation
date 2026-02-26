@@ -260,32 +260,68 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         // ===================================
-        // PAGE LOADING INDICATOR
+        // PAGE LOADING INDICATOR - ROBUST FIX
         // ===================================
         (function() {
             const loader = document.getElementById('pageLoader');
+            let hideTimeout;
+            let navigationTimeout;
             
-            // Hide loader when page is fully loaded
-            window.addEventListener('load', function() {
+            function hideLoaderImmediately() {
+                if (hideTimeout) clearTimeout(hideTimeout);
+                if (navigationTimeout) clearTimeout(navigationTimeout);
                 if (loader) {
                     loader.style.opacity = '0';
-                    setTimeout(() => {
-                        loader.style.display = 'none';
+                    loader.style.display = 'none';
+                }
+            }
+            
+            function hideLoaderWithTransition() {
+                if (hideTimeout) clearTimeout(hideTimeout);
+                if (loader) {
+                    loader.style.opacity = '0';
+                    hideTimeout = setTimeout(() => {
+                        if (loader && loader.style.opacity === '0') {
+                            loader.style.display = 'none';
+                        }
                     }, 300);
                 }
+            }
+            
+            function showLoader() {
+                if (navigationTimeout) clearTimeout(navigationTimeout);
+                if (loader) {
+                    loader.style.display = 'flex';
+                    loader.style.opacity = '1';
+                    // Force hide after 3 seconds - page should load by then
+                    navigationTimeout = setTimeout(hideLoaderWithTransition, 3000);
+                }
+            }
+            
+            // Hide loader when page is fully loaded
+            window.addEventListener('load', hideLoaderWithTransition);
+            
+            // Support for back/forward cache (bfcache) - this is the KEY EVENT for back button
+            window.addEventListener('pageshow', function(event) {
+                hideLoaderImmediately(); // Hide immediately when coming from cache
             });
             
-            // Show loader on navigation
+            window.addEventListener('pagehide', function() {
+                if (navigationTimeout) clearTimeout(navigationTimeout);
+                if (hideTimeout) clearTimeout(hideTimeout);
+            });
+            
+            // Show loader on link click
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
                 if (link && link.href && !link.target && !link.hasAttribute('data-no-loader')) {
-                    const url = new URL(link.href);
-                    // Only show loader for same-origin navigation
-                    if (url.origin === window.location.origin) {
-                        if (loader) {
-                            loader.style.display = 'flex';
-                            loader.style.opacity = '1';
+                    try {
+                        const url = new URL(link.href);
+                        if (url.origin === window.location.origin) {
+                            showLoader();
                         }
+                    } catch {
+                        // Invalid URL, ignore
                     }
                 }
             });
@@ -293,8 +329,14 @@
             // Show loader on form submission
             document.addEventListener('submit', function(e) {
                 if (loader && !e.target.hasAttribute('data-no-loader')) {
-                    loader.style.display = 'flex';
-                    loader.style.opacity = '1';
+                    showLoader();
+                }
+            });
+            
+            // Hide loader immediately if page becomes visible (alternative to pageshow)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && document.readyState === 'complete') {
+                    hideLoaderWithTransition();
                 }
             });
         })();

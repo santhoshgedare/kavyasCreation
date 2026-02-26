@@ -430,6 +430,13 @@ html[data-bs-theme="dark"] .newsletter-section .form-control:focus {
     z-index: 9999;
     opacity: 1;
     transition: opacity 0.3s ease;
+    pointer-events: auto;
+}
+
+/* When loader is hidden, don't intercept clicks */
+.page-loader[style*="opacity: 0"],
+.page-loader[style*="display: none"] {
+    pointer-events: none;
 }
 
 html[data-bs-theme="dark"] .page-loader {
