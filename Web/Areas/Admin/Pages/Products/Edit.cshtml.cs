@@ -96,7 +96,7 @@ namespace Web.Areas.Admin.Pages.Products
                 var image = await _unitOfWork.Products.GetImageByIdAsync(imageId);
                 if (image is not null)
                 {
-                    await _blobStorageService.DeleteAsync(image.Url, "products");
+                    await _blobStorageService.DeleteAsync(image.Url, "product-images");
                     await _unitOfWork.Products.RemoveImageAsync(imageId);
                     TempData["SuccessMessage"] = "Image deleted successfully!";
                 }
@@ -164,7 +164,7 @@ namespace Web.Areas.Admin.Pages.Products
 
                 try
                 {
-                    var imageUrl = await _blobStorageService.UploadAsync(file, "products");
+                    var imageUrl = await _blobStorageService.UploadAsync(file, "product-images");
                     _logger.LogInformation("Image uploaded to Azure: {ImageUrl}", imageUrl);
 
                     images.Add(new ProductImage

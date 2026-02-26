@@ -124,7 +124,7 @@ namespace Web.Areas.Admin.Pages.Products
 
                 try
                 {
-                    var imageUrl = await _blobStorageService.UploadAsync(file, "products");
+                    var imageUrl = await _blobStorageService.UploadAsync(file, "product-images");
                     _logger.LogInformation("Image uploaded to Azure: {ImageUrl}", imageUrl);
 
                     images.Add(new ProductImage

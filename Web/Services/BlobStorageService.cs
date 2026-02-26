@@ -8,16 +8,16 @@ namespace Web.Services
     /// </summary>
     public interface IBlobStorageService
     {
-        Task<string> UploadAsync(IFormFile file, string containerName = "products");
-        Task<bool> DeleteAsync(string blobUri, string containerName = "products");
-        Task<Stream> DownloadAsync(string blobName, string containerName = "products");
+        Task<string> UploadAsync(IFormFile file, string containerName = "product-images");
+        Task<bool> DeleteAsync(string blobUri, string containerName = "product-images");
+        Task<Stream> DownloadAsync(string blobName, string containerName = "product-images");
     }
 
     public class BlobStorageService : IBlobStorageService
     {
         private readonly BlobServiceClient _blobServiceClient;
         private readonly ILogger<BlobStorageService> _logger;
-        private const string ProductContainer = "products";
+        private const string ProductContainer = "product-images";
 
         public BlobStorageService(BlobServiceClient blobServiceClient, ILogger<BlobStorageService> logger)
         {
@@ -28,7 +28,7 @@ namespace Web.Services
         /// <summary>
         /// Uploads a file to Azure Blob Storage
         /// </summary>
-        public async Task<string> UploadAsync(IFormFile file, string containerName = "products")
+        public async Task<string> UploadAsync(IFormFile file, string containerName = "product-images")
         {
             try
             {
@@ -57,7 +57,7 @@ namespace Web.Services
         /// <summary>
         /// Deletes a blob from Azure Blob Storage
         /// </summary>
-        public async Task<bool> DeleteAsync(string blobUri, string containerName = "products")
+        public async Task<bool> DeleteAsync(string blobUri, string containerName = "product-images")
         {
             try
             {
@@ -86,7 +86,7 @@ namespace Web.Services
         /// <summary>
         /// Downloads a blob from Azure Blob Storage
         /// </summary>
-        public async Task<Stream> DownloadAsync(string blobName, string containerName = "products")
+        public async Task<Stream> DownloadAsync(string blobName, string containerName = "product-images")
         {
             try
             {
