@@ -6,6 +6,7 @@ namespace Core.Interfaces
     {
         Task<IReadOnlyList<Category>> ListAsync();
         Task<Category?> GetByIdAsync(Guid id);
+        Task<Category?> GetByIdWithVariantTypesAsync(Guid id);
         Task AddAsync(Category category);
         Task UpdateAsync(Category category);
         Task DeleteAsync(Guid id);

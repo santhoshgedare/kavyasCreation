@@ -58,7 +58,14 @@
                                 @foreach (var item in order.Items)
                                 {
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span>@item.Name <small class="text-muted">x @item.Quantity</small></span>
+                                        <span>
+                                            @item.Name
+                                            @if (!string.IsNullOrWhiteSpace(item.VariantDescription))
+                                            {
+                                                <small class="text-muted">(@item.VariantDescription)</small>
+                                            }
+                                            <small class="text-muted">x @item.Quantity</small>
+                                        </span>
                                         <span>@(item.Price * item.Quantity).ToString("C")</span>
                                     </li>
                                 }

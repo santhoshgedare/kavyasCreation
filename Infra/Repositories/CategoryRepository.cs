@@ -10,9 +10,16 @@ namespace Infra.Repositories
         private readonly AppDbContext _db;
         public CategoryRepository(AppDbContext db) => _db = db;
 
-        public async Task<IReadOnlyList<Category>> ListAsync() => await _db.Categories.AsNoTracking().ToListAsync();
+        public async Task<IReadOnlyList<Category>> ListAsync() => await _db.Categories
+            .Include(c => c.VariantTypes.OrderBy(v => v.SortOrder))
+            .AsNoTracking()
+            .ToListAsync();
 
         public async Task<Category?> GetByIdAsync(Guid id) => await _db.Categories.FindAsync(id);
+
+        public async Task<Category?> GetByIdWithVariantTypesAsync(Guid id) => await _db.Categories
+            .Include(c => c.VariantTypes.OrderBy(v => v.SortOrder))
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         public async Task AddAsync(Category category)
         {

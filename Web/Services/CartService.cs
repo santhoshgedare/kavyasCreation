@@ -32,18 +32,28 @@ namespace Web.Services
         /// </summary>
         /// <param name="product">The product to add.</param>
         /// <param name="quantity">The quantity to add (default: 1).</param>
-        public void AddItem(Product product, int quantity = 1)
+        /// <param name="variant">The selected variant, or null for products without variants.</param>
+        public void AddItem(Product product, int quantity = 1, ProductVariant? variant = null)
         {
             var items = GetItems();
-            var existing = items.FirstOrDefault(i => i.ProductId == product.Id);
+            var variantId = variant?.Id;
+            var existing = items.FirstOrDefault(i => i.ProductId == product.Id && i.ProductVariantId == variantId);
             if (existing is null)
             {
                 var imageUrl = product.Images.FirstOrDefault()?.Url ?? "/uploads/products/placeholder.svg";
+                var variantDescription = variant != null
+                    ? string.Join(", ", variant.Options
+                        .OrderBy(o => o.CategoryVariantType?.SortOrder)
+                        .Select(o => $"{o.CategoryVariantType?.Name}: {o.Value}"))
+                    : null;
+
                 items.Add(new CartItem
                 {
                     ProductId = product.Id,
+                    ProductVariantId = variantId,
                     Name = product.Name,
-                    Price = product.Price,
+                    VariantDescription = variantDescription,
+                    Price = variant?.Price ?? product.Price,
                     Quantity = quantity,
                     ImageUrl = imageUrl
                 });
@@ -56,10 +66,10 @@ namespace Web.Services
             Session.SetObject(CartKey, items);
         }
 
-        public void UpdateQuantity(Guid productId, int quantity)
+        public void UpdateQuantity(Guid productId, int quantity, Guid? variantId = null)
         {
             var items = GetItems();
-            var existing = items.FirstOrDefault(i => i.ProductId == productId);
+            var existing = items.FirstOrDefault(i => i.ProductId == productId && i.ProductVariantId == variantId);
             if (existing is not null)
             {
                 existing.Quantity = Math.Max(1, quantity);
@@ -67,10 +77,10 @@ namespace Web.Services
             }
         }
 
-        public void RemoveItem(Guid productId)
+        public void RemoveItem(Guid productId, Guid? variantId = null)
         {
             var items = GetItems();
-            items.RemoveAll(i => i.ProductId == productId);
+            items.RemoveAll(i => i.ProductId == productId && i.ProductVariantId == variantId);
             Session.SetObject(CartKey, items);
         }
 

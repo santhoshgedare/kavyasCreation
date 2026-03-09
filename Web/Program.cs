@@ -111,13 +111,6 @@ builder.Services.AddScoped<IWishlistRepository, WishlistRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IUserAddressRepository, UserAddressRepository>();
 
-// New marketplace repositories
-builder.Services.AddScoped<IVendorRepository, VendorRepository>();
-builder.Services.AddScoped<IVendorUserRepository, VendorUserRepository>();
-builder.Services.AddScoped<IBuyerCompanyRepository, BuyerCompanyRepository>();
-builder.Services.AddScoped<IBuyerUserRepository, BuyerUserRepository>();
-builder.Services.AddScoped<IVendorBuyerRelationshipRepository, VendorBuyerRelationshipRepository>();
-
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 

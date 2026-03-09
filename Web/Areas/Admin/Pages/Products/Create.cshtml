@@ -61,6 +61,25 @@
                 <input class="form-control" asp-for="SpecValue" placeholder="e.g., 30 hours" />
             </div>
         </div>
+
+        <!-- Variants Section -->
+        <div id="variantsSection" class="mb-3" style="display:none;">
+            <label class="form-label fw-bold">Product Variants</label>
+            <p class="text-muted small">Add variants with specific prices and stock for each combination.</p>
+            <input type="hidden" asp-for="VariantsJson" />
+            <div id="variantsTable" class="table-responsive">
+                <table class="table table-bordered table-sm" id="variantTableEl">
+                    <thead class="table-light">
+                        <tr id="variantHeader"></tr>
+                    </thead>
+                    <tbody id="variantBody"></tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addVariantBtn">
+                <i class="bi bi-plus-circle"></i> Add Variant
+            </button>
+        </div>
+
         <div class="d-flex gap-2">
             <button class="btn btn-success" type="submit">Save</button>
             <a class="btn btn-outline-secondary" asp-page="/Products/Index" asp-area="Admin">Cancel</a>
@@ -71,110 +90,266 @@
 @section Scripts {
     <script>
         (function () {
+            // ===== IMAGE UPLOAD LOGIC =====
             const input = document.getElementById("imageUploadsCreate");
             const list = document.getElementById("imageUploadListCreate");
-            if (!input || !list) return;
+            if (input && list) {
+                const dt = new DataTransfer();
+                let dragIndex = null;
 
-            const dt = new DataTransfer();
-            let dragIndex = null;
+                const render = () => {
+                    list.innerHTML = "";
+                    const files = [...dt.files];
+                    files.forEach((file, index) => {
+                        const row = document.createElement("div");
+                        row.className = "d-flex align-items-center justify-content-between border rounded p-2";
+                        row.draggable = true;
 
-            const render = () => {
-                list.innerHTML = "";
-                const files = [...dt.files];
-                files.forEach((file, index) => {
-                    const row = document.createElement("div");
-                    row.className = "d-flex align-items-center justify-content-between border rounded p-2";
-                    row.draggable = true;
+                        const left = document.createElement("div");
+                        left.className = "d-flex align-items-center gap-2";
 
-                    const left = document.createElement("div");
-                    left.className = "d-flex align-items-center gap-2";
+                        const img = document.createElement("img");
+                        img.src = URL.createObjectURL(file);
+                        img.className = "rounded";
+                        img.style.width = "60px";
+                        img.style.height = "60px";
+                        img.style.objectFit = "cover";
 
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(file);
-                    img.className = "rounded";
-                    img.style.width = "60px";
-                    img.style.height = "60px";
-                    img.style.objectFit = "cover";
+                        const info = document.createElement("div");
+                        info.innerHTML = `<div class="fw-semibold">${file.name}</div><div class="text-muted small">${Math.round(file.size / 1024)} KB</div>`;
 
-                    const info = document.createElement("div");
-                    info.innerHTML = `<div class="fw-semibold">${file.name}</div><div class="text-muted small">${Math.round(file.size / 1024)} KB</div>`;
+                        left.appendChild(img);
+                        left.appendChild(info);
 
-                    left.appendChild(img);
-                    left.appendChild(info);
+                        const actions = document.createElement("div");
+                        actions.className = "d-flex gap-1";
 
-                    const actions = document.createElement("div");
-                    actions.className = "d-flex gap-1";
+                        const up = document.createElement("button");
+                        up.type = "button";
+                        up.className = "btn btn-outline-secondary btn-sm";
+                        up.textContent = "Up";
+                        up.addEventListener("click", () => move(index, -1));
 
-                    const up = document.createElement("button");
-                    up.type = "button";
-                    up.className = "btn btn-outline-secondary btn-sm";
-                    up.textContent = "Up";
-                    up.addEventListener("click", () => move(index, -1));
+                        const down = document.createElement("button");
+                        down.type = "button";
+                        down.className = "btn btn-outline-secondary btn-sm";
+                        down.textContent = "Down";
+                        down.addEventListener("click", () => move(index, 1));
 
-                    const down = document.createElement("button");
-                    down.type = "button";
-                    down.className = "btn btn-outline-secondary btn-sm";
-                    down.textContent = "Down";
-                    down.addEventListener("click", () => move(index, 1));
+                        const remove = document.createElement("button");
+                        remove.type = "button";
+                        remove.className = "btn btn-outline-danger btn-sm";
+                        remove.textContent = "Remove";
+                        remove.addEventListener("click", () => removeAt(index));
 
-                    const remove = document.createElement("button");
-                    remove.type = "button";
-                    remove.className = "btn btn-outline-danger btn-sm";
-                    remove.textContent = "Remove";
-                    remove.addEventListener("click", () => removeAt(index));
+                        actions.appendChild(up);
+                        actions.appendChild(down);
+                        actions.appendChild(remove);
 
-                    actions.appendChild(up);
-                    actions.appendChild(down);
-                    actions.appendChild(remove);
+                        row.appendChild(left);
+                        row.appendChild(actions);
+                        list.appendChild(row);
 
-                    row.appendChild(left);
-                    row.appendChild(actions);
-                    list.appendChild(row);
-
-                    row.addEventListener("dragstart", () => {
-                        dragIndex = index;
+                        row.addEventListener("dragstart", () => { dragIndex = index; });
+                        row.addEventListener("dragover", (event) => { event.preventDefault(); });
+                        row.addEventListener("drop", (event) => {
+                            event.preventDefault();
+                            if (dragIndex === null || dragIndex === index) return;
+                            const temp = files[dragIndex];
+                            files.splice(dragIndex, 1);
+                            files.splice(index, 0, temp);
+                            dt.items.clear();
+                            files.forEach(file => dt.items.add(file));
+                            dragIndex = null;
+                            render();
+                        });
                     });
-                    row.addEventListener("dragover", (event) => {
-                        event.preventDefault();
-                    });
-                    row.addEventListener("drop", (event) => {
-                        event.preventDefault();
-                        if (dragIndex === null || dragIndex === index) return;
-                        const temp = files[dragIndex];
-                        files.splice(dragIndex, 1);
-                        files.splice(index, 0, temp);
-                        dt.items.clear();
-                        files.forEach(file => dt.items.add(file));
-                        dragIndex = null;
-                        render();
-                    });
+                    input.files = dt.files;
+                };
+
+                const move = (index, direction) => {
+                    const files = [...dt.files];
+                    const swapIndex = index + direction;
+                    if (swapIndex < 0 || swapIndex >= files.length) return;
+                    [files[index], files[swapIndex]] = [files[swapIndex], files[index]];
+                    dt.items.clear();
+                    files.forEach(file => dt.items.add(file));
+                    render();
+                };
+
+                const removeAt = (index) => {
+                    const files = [...dt.files];
+                    files.splice(index, 1);
+                    dt.items.clear();
+                    files.forEach(file => dt.items.add(file));
+                    render();
+                };
+
+                input.addEventListener("change", () => {
+                    [...input.files].forEach(file => dt.items.add(file));
+                    render();
+                });
+            }
+
+            // ===== VARIANTS LOGIC =====
+            const categoryVariantTypes = @Html.Raw(Model.CategoriesVariantTypesJson);
+            const categorySelect = document.querySelector("select[name='Product.CategoryId']");
+            const variantsSection = document.getElementById("variantsSection");
+            const variantHeader = document.getElementById("variantHeader");
+            const variantBody = document.getElementById("variantBody");
+            const addVariantBtn = document.getElementById("addVariantBtn");
+            const variantsJsonInput = document.querySelector("input[name='VariantsJson']");
+
+            let currentVariantTypes = [];
+
+            function updateVariantsUI() {
+                const catId = categorySelect.value;
+                currentVariantTypes = categoryVariantTypes[catId] || [];
+
+                if (currentVariantTypes.length === 0) {
+                    variantsSection.style.display = "none";
+                    variantsJsonInput.value = "";
+                    return;
+                }
+
+                variantsSection.style.display = "";
+                variantHeader.innerHTML = "";
+                variantBody.innerHTML = "";
+
+                currentVariantTypes.forEach(name => {
+                    const th = document.createElement("th");
+                    th.textContent = name;
+                    variantHeader.appendChild(th);
+                });
+                ["SKU", "Price", "Stock", "Images", ""].forEach(label => {
+                    const th = document.createElement("th");
+                    th.textContent = label;
+                    variantHeader.appendChild(th);
+                });
+            }
+
+            function addVariantRow(data) {
+                const tr = document.createElement("tr");
+                const rowIndex = variantBody.querySelectorAll("tr").length;
+                tr.dataset.variantIndex = rowIndex;
+
+                currentVariantTypes.forEach(name => {
+                    const td = document.createElement("td");
+                    const inp = document.createElement("input");
+                    inp.type = "text";
+                    inp.className = "form-control form-control-sm variant-option";
+                    inp.dataset.typeName = name;
+                    inp.placeholder = name;
+                    inp.value = data?.options?.[name] || "";
+                    inp.addEventListener("input", syncVariantsJson);
+                    td.appendChild(inp);
+                    tr.appendChild(td);
                 });
 
-                input.files = dt.files;
-            };
+                const skuTd = document.createElement("td");
+                const skuInp = document.createElement("input");
+                skuInp.type = "text";
+                skuInp.className = "form-control form-control-sm variant-sku";
+                skuInp.placeholder = "SKU";
+                skuInp.value = data?.sku || "";
+                skuInp.addEventListener("input", syncVariantsJson);
+                skuTd.appendChild(skuInp);
+                tr.appendChild(skuTd);
 
-            const move = (index, direction) => {
-                const files = [...dt.files];
-                const swapIndex = index + direction;
-                if (swapIndex < 0 || swapIndex >= files.length) return;
-                [files[index], files[swapIndex]] = [files[swapIndex], files[index]];
-                dt.items.clear();
-                files.forEach(file => dt.items.add(file));
-                render();
-            };
+                const priceTd = document.createElement("td");
+                const priceInp = document.createElement("input");
+                priceInp.type = "number";
+                priceInp.step = "0.01";
+                priceInp.min = "0.01";
+                priceInp.className = "form-control form-control-sm variant-price";
+                priceInp.placeholder = "Price";
+                priceInp.value = data?.price || "";
+                priceInp.required = true;
+                priceInp.addEventListener("input", syncVariantsJson);
+                priceTd.appendChild(priceInp);
+                tr.appendChild(priceTd);
 
-            const removeAt = (index) => {
-                const files = [...dt.files];
-                files.splice(index, 1);
-                dt.items.clear();
-                files.forEach(file => dt.items.add(file));
-                render();
-            };
+                const stockTd = document.createElement("td");
+                const stockInp = document.createElement("input");
+                stockInp.type = "number";
+                stockInp.min = "0";
+                stockInp.className = "form-control form-control-sm variant-stock";
+                stockInp.placeholder = "Stock";
+                stockInp.value = data?.stock ?? "";
+                stockInp.required = true;
+                stockInp.addEventListener("input", syncVariantsJson);
+                stockTd.appendChild(stockInp);
+                tr.appendChild(stockTd);
 
-            input.addEventListener("change", () => {
-                [...input.files].forEach(file => dt.items.add(file));
-                render();
-            });
+                // Variant images cell
+                const imgTd = document.createElement("td");
+                imgTd.style.minWidth = "180px";
+                const newImgPreview = document.createElement("div");
+                newImgPreview.className = "d-flex flex-wrap gap-1 mb-1 variant-new-img-preview";
+                imgTd.appendChild(newImgPreview);
+                const fileInput = document.createElement("input");
+                fileInput.type = "file";
+                fileInput.accept = "image/*";
+                fileInput.multiple = true;
+                fileInput.className = "form-control form-control-sm variant-images";
+                fileInput.name = `variant-images-${rowIndex}`;
+                fileInput.addEventListener("change", () => {
+                    newImgPreview.innerHTML = "";
+                    [...fileInput.files].forEach(f => {
+                        const thumb = document.createElement("img");
+                        thumb.src = URL.createObjectURL(f);
+                        thumb.className = "rounded";
+                        thumb.style.width = "40px";
+                        thumb.style.height = "40px";
+                        thumb.style.objectFit = "cover";
+                        newImgPreview.appendChild(thumb);
+                    });
+                });
+                imgTd.appendChild(fileInput);
+                tr.appendChild(imgTd);
+
+                const actionTd = document.createElement("td");
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.className = "btn btn-outline-danger btn-sm";
+                removeBtn.textContent = "Remove";
+                removeBtn.addEventListener("click", () => { tr.remove(); reindexVariantRows(); syncVariantsJson(); });
+                actionTd.appendChild(removeBtn);
+                tr.appendChild(actionTd);
+
+                variantBody.appendChild(tr);
+                syncVariantsJson();
+            }
+
+            function reindexVariantRows() {
+                variantBody.querySelectorAll("tr").forEach((tr, i) => {
+                    tr.dataset.variantIndex = i;
+                    const fileInput = tr.querySelector(".variant-images");
+                    if (fileInput) fileInput.name = `variant-images-${i}`;
+                });
+            }
+
+            function syncVariantsJson() {
+                const rows = variantBody.querySelectorAll("tr");
+                const variants = [];
+                rows.forEach(row => {
+                    const options = {};
+                    row.querySelectorAll(".variant-option").forEach(inp => {
+                        if (inp.value.trim()) {
+                            options[inp.dataset.typeName] = inp.value.trim();
+                        }
+                    });
+                    const price = parseFloat(row.querySelector(".variant-price")?.value) || 0;
+                    const stock = parseInt(row.querySelector(".variant-stock")?.value) || 0;
+                    const sku = row.querySelector(".variant-sku")?.value?.trim() || null;
+                    variants.push({ options, price, stock, sku });
+                });
+                variantsJsonInput.value = variants.length > 0 ? JSON.stringify(variants) : "";
+            }
+
+            categorySelect.addEventListener("change", updateVariantsUI);
+            addVariantBtn.addEventListener("click", () => addVariantRow());
+            updateVariantsUI();
         })();
     </script>
 }

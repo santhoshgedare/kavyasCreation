@@ -132,10 +132,24 @@
                                 <!-- Price and Action -->
                                 <div class="product-footer">
                                     <div class="product-price">
-                                        <span class="price-amount">@product.Price.ToString("C")</span>
+                                        @if (product.HasVariants && product.MinVariantPrice.HasValue)
+                                        {
+                                            <span class="price-amount">From @product.MinVariantPrice.Value.ToString("C")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="price-amount">@product.Price.ToString("C")</span>
+                                        }
                                     </div>
-                                    
-                                    @if (product.AvailableStock > 0)
+
+                                    @if (product.HasVariants)
+                                    {
+                                        <a asp-page="/Catalog/Details" asp-area="Store" asp-route-id="@product.Id"
+                                           class="btn-add-modern">
+                                            Select Options
+                                        </a>
+                                    }
+                                    else if (product.AvailableStock > 0)
                                     {
                                         @if (User.Identity?.IsAuthenticated == true)
                                         {

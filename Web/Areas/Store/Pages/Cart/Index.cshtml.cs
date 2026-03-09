@@ -43,7 +43,7 @@ namespace Web.Areas.Store.Pages.Cart
             }
         }
 
-        public async Task<IActionResult> OnPostUpdateAsync(Guid productId, int quantity)
+        public async Task<IActionResult> OnPostUpdateAsync(Guid productId, int quantity, Guid? variantId)
         {
             if (quantity < 1)
             {
@@ -51,33 +51,60 @@ namespace Web.Areas.Store.Pages.Cart
                 return RedirectToPage();
             }
 
-            var available = await _db.Products
-                .Where(p => p.Id == productId)
-                .Select(p => p.AvailableStock)
-                .FirstOrDefaultAsync();
-
-            if (available <= 0)
+            if (variantId.HasValue && variantId != Guid.Empty)
             {
-                TempData["WarningMessage"] = "This item is currently out of stock.";
-                _cartService.RemoveItem(productId);
-                return RedirectToPage();
+                var variantStock = await _db.ProductVariants
+                    .Where(v => v.Id == variantId.Value)
+                    .Select(v => v.Stock)
+                    .FirstOrDefaultAsync();
+
+                if (variantStock <= 0)
+                {
+                    TempData["WarningMessage"] = "This variant is currently out of stock.";
+                    _cartService.RemoveItem(productId, variantId);
+                    return RedirectToPage();
+                }
+
+                if (quantity > variantStock)
+                {
+                    _cartService.UpdateQuantity(productId, variantStock, variantId);
+                    TempData["WarningMessage"] = $"Only {variantStock} available. Quantity updated.";
+                    return RedirectToPage();
+                }
+
+                _cartService.UpdateQuantity(productId, quantity, variantId);
+            }
+            else
+            {
+                var available = await _db.Products
+                    .Where(p => p.Id == productId)
+                    .Select(p => p.AvailableStock)
+                    .FirstOrDefaultAsync();
+
+                if (available <= 0)
+                {
+                    TempData["WarningMessage"] = "This item is currently out of stock.";
+                    _cartService.RemoveItem(productId);
+                    return RedirectToPage();
+                }
+
+                if (quantity > available)
+                {
+                    _cartService.UpdateQuantity(productId, available);
+                    TempData["WarningMessage"] = $"Only {available} available. Quantity updated.";
+                    return RedirectToPage();
+                }
+
+                _cartService.UpdateQuantity(productId, quantity);
             }
 
-            if (quantity > available)
-            {
-                _cartService.UpdateQuantity(productId, available);
-                TempData["WarningMessage"] = $"Only {available} available. Quantity updated.";
-                return RedirectToPage();
-            }
-
-            _cartService.UpdateQuantity(productId, quantity);
             TempData["SuccessMessage"] = "Cart updated.";
             return RedirectToPage();
         }
 
-        public IActionResult OnPostRemove(Guid productId)
+        public IActionResult OnPostRemove(Guid productId, Guid? variantId)
         {
-            _cartService.RemoveItem(productId);
+            _cartService.RemoveItem(productId, variantId);
             TempData["InfoMessage"] = "Item removed from cart.";
             return RedirectToPage();
         }

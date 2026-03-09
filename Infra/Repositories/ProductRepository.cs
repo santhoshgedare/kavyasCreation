@@ -15,12 +15,21 @@ namespace Infra.Repositories
             .Include(p => p.Category)
             .Include(p => p.Images.OrderBy(i => i.SortOrder))
             .Include(p => p.Specifications)
+            .Include(p => p.Variants.Where(v => v.IsActive))
+                .ThenInclude(v => v.Options)
+                    .ThenInclude(o => o.CategoryVariantType)
+            .Include(p => p.Variants.Where(v => v.IsActive))
+                .ThenInclude(v => v.Images.OrderBy(i => i.SortOrder))
             .FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task<IReadOnlyList<Product>> ListAsync() => await _db.Products
             .Include(p => p.Category)
             .Include(p => p.Images.OrderBy(i => i.SortOrder))
             .Include(p => p.Specifications)
+            .Include(p => p.Variants.Where(v => v.IsActive))
+                .ThenInclude(v => v.Options)
+            .Include(p => p.Variants.Where(v => v.IsActive))
+                .ThenInclude(v => v.Images.OrderBy(i => i.SortOrder))
             .AsNoTracking()
             .ToListAsync();
 
@@ -46,10 +55,13 @@ namespace Infra.Repositories
                     p.Id,
                     p.Name,
                     p.Description,
-                    p.Price,
-                    p.Stock - p.ReservedStock,
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Min(v => v.Price) : p.Price,
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Sum(v => v.Stock) : p.Stock - p.ReservedStock,
                     p.Category != null ? p.Category.Name : null,
-                    p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault()))
+                    p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
+                    p.Variants.Any(v => v.IsActive),
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Min(v => v.Price) : (decimal?)null,
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Max(v => v.Price) : (decimal?)null))
                 .ToListAsync();
         }
 
@@ -80,10 +92,13 @@ namespace Infra.Repositories
                     p.Id,
                     p.Name,
                     p.Description,
-                    p.Price,
-                    p.Stock - p.ReservedStock,
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Min(v => v.Price) : p.Price,
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Sum(v => v.Stock) : p.Stock - p.ReservedStock,
                     p.Category != null ? p.Category.Name : null,
-                    p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault()))
+                    p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
+                    p.Variants.Any(v => v.IsActive),
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Min(v => v.Price) : (decimal?)null,
+                    p.Variants.Any(v => v.IsActive) ? p.Variants.Where(v => v.IsActive).Max(v => v.Price) : (decimal?)null))
                 .ToListAsync();
 
             return (products, totalCount);

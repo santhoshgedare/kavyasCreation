@@ -21,6 +21,7 @@ namespace Web.Areas.Store.Pages.Catalog
         }
 
         public Product? Product { get; private set; }
+        public List<CategoryVariantType> VariantTypes { get; private set; } = [];
 
         public async Task<IActionResult> OnGetAsync(Guid id)
         {
@@ -34,12 +35,18 @@ namespace Web.Areas.Store.Pages.Catalog
                 }
 
                 Product = await _unitOfWork.Products.GetByIdAsync(id);
-                
+
                 if (Product is null)
                 {
                     _logger.LogWarning("Product {ProductId} not found", id);
                     TempData["Error"] = "Product not found";
                     return RedirectToPage("/Catalog/Index", new { area = "Store" });
+                }
+
+                if (Product.Variants.Count > 0)
+                {
+                    var category = await _unitOfWork.Categories.GetByIdWithVariantTypesAsync(Product.CategoryId);
+                    VariantTypes = category?.VariantTypes.OrderBy(v => v.SortOrder).ToList() ?? [];
                 }
 
                 return Page();
@@ -53,7 +60,7 @@ namespace Web.Areas.Store.Pages.Catalog
         }
 
         [Authorize]
-        public async Task<IActionResult> OnPostAddAsync(Guid productId)
+        public async Task<IActionResult> OnPostAddAsync(Guid productId, Guid? variantId)
         {
             try
             {
@@ -72,6 +79,34 @@ namespace Web.Areas.Store.Pages.Catalog
                     return RedirectToPage("/Catalog/Index", new { area = "Store" });
                 }
 
+                // Handle variant products
+                if (product.Variants.Count > 0)
+                {
+                    if (!variantId.HasValue || variantId == Guid.Empty)
+                    {
+                        TempData["Error"] = "Please select a variant before adding to cart";
+                        return RedirectToPage(new { id = productId });
+                    }
+
+                    var variant = product.Variants.FirstOrDefault(v => v.Id == variantId.Value);
+                    if (variant is null)
+                    {
+                        TempData["Error"] = "Selected variant not found";
+                        return RedirectToPage(new { id = productId });
+                    }
+
+                    if (variant.Stock < 1)
+                    {
+                        TempData["Error"] = "Selected variant is out of stock";
+                        return RedirectToPage(new { id = productId });
+                    }
+
+                    _cartService.AddItem(product, 1, variant);
+                    TempData["Success"] = $"{product.Name} ({string.Join(", ", variant.Options.Select(o => o.Value))}) added to cart";
+                    return RedirectToPage(new { id = productId });
+                }
+
+                // Handle non-variant products
                 if (product.AvailableStock < 1)
                 {
                     _logger.LogInformation("Attempted to add out-of-stock product {ProductId} to cart", productId);
@@ -81,9 +116,9 @@ namespace Web.Areas.Store.Pages.Catalog
 
                 _cartService.AddItem(product);
                 TempData["Success"] = $"{product.Name} added to cart successfully";
-                
+
                 _logger.LogInformation("Product {ProductId} added to cart for user {UserId}", productId, User.Identity?.Name);
-                
+
                 return RedirectToPage(new { id = productId });
             }
             catch (Exception ex)

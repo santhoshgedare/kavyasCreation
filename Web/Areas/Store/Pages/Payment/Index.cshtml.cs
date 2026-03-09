@@ -136,7 +136,9 @@ namespace Web.Areas.Store.Pages.Payment
                     Id = Guid.NewGuid(),
                     OrderId = orderId,
                     ProductId = i.ProductId,
+                    ProductVariantId = i.ProductVariantId,
                     Name = i.Name,
+                    VariantDescription = i.VariantDescription,
                     Price = i.Price,
                     Quantity = i.Quantity
                 }).ToList()

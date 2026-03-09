@@ -21,13 +21,11 @@ namespace Infra.Data
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<UserAddress> UserAddresses => Set<UserAddress>();
-        
-        // New marketplace DbSets
-        public DbSet<Vendor> Vendors => Set<Vendor>();
-        public DbSet<VendorUser> VendorUsers => Set<VendorUser>();
-        public DbSet<BuyerCompany> BuyerCompanies => Set<BuyerCompany>();
-        public DbSet<BuyerUser> BuyerUsers => Set<BuyerUser>();
-        public DbSet<VendorBuyerRelationship> VendorBuyerRelationships => Set<VendorBuyerRelationship>();
+
+        // Variant support
+        public DbSet<CategoryVariantType> CategoryVariantTypes => Set<CategoryVariantType>();
+        public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+        public DbSet<ProductVariantOption> ProductVariantOptions => Set<ProductVariantOption>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -53,11 +51,40 @@ namespace Infra.Data
                 entity.HasMany(p => p.Reviews)
                     .WithOne()
                     .HasForeignKey(r => r.ProductId);
+                entity.HasMany(p => p.Variants)
+                    .WithOne(v => v.Product)
+                    .HasForeignKey(v => v.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.Property(p => p.Price).HasPrecision(18, 2);
                 entity.Property(p => p.AverageRating).HasPrecision(3, 2);
                 entity.Property(p => p.RowVersion).IsRowVersion();
                 entity.Ignore(p => p.AvailableStock);
                 entity.Ignore(p => p.LowStockAlert);
+                entity.Ignore(p => p.HasVariants);
+            });
+
+            builder.Entity<ProductVariant>(entity =>
+            {
+                entity.Property(v => v.Price).HasPrecision(18, 2);
+                entity.Property(v => v.SKU).HasMaxLength(100);
+                entity.HasMany(v => v.Options)
+                    .WithOne(o => o.ProductVariant)
+                    .HasForeignKey(o => o.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(v => v.Images)
+                    .WithOne()
+                    .HasForeignKey(i => i.ProductVariantId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            builder.Entity<ProductVariantOption>(entity =>
+            {
+                entity.Property(o => o.Value).HasMaxLength(200).IsRequired();
+                entity.HasOne(o => o.CategoryVariantType)
+                    .WithMany()
+                    .HasForeignKey(o => o.CategoryVariantTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                entity.HasIndex(o => new { o.ProductVariantId, o.CategoryVariantTypeId });
             });
 
             builder.Entity<ProductImage>(entity =>
@@ -75,6 +102,16 @@ namespace Infra.Data
             builder.Entity<Category>(entity =>
             {
                 entity.Property(c => c.Name).HasMaxLength(200);
+                entity.HasMany(c => c.VariantTypes)
+                    .WithOne(v => v.Category)
+                    .HasForeignKey(v => v.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<CategoryVariantType>(entity =>
+            {
+                entity.Property(v => v.Name).HasMaxLength(100).IsRequired();
+                entity.HasIndex(v => new { v.CategoryId, v.SortOrder });
             });
 
             builder.Entity<OrderItem>(entity =>

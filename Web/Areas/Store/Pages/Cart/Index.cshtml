@@ -63,6 +63,10 @@
                                         <div class="fw-semibold">
                                             <a class="text-decoration-none" asp-page="/Catalog/Details" asp-area="Store" asp-route-id="@item.ProductId">@item.Name</a>
                                         </div>
+                                        @if (!string.IsNullOrWhiteSpace(item.VariantDescription))
+                                        {
+                                            <div class="text-muted small">@item.VariantDescription</div>
+                                        }
                                         <div class="text-muted">@item.Price.ToString("C")</div>
                                         @if (Model.AvailableStock.TryGetValue(item.ProductId, out var available))
                                         {
@@ -85,6 +89,7 @@
                             <td class="text-center">
                                 <form method="post" asp-page-handler="Update" class="d-inline">
                                     <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="variantId" value="@item.ProductVariantId" />
                                     <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm" style="width:90px;display:inline-block;" />
                                     <button class="btn btn-link btn-sm" type="submit">Update</button>
                                 </form>
@@ -94,6 +99,7 @@
                             <td class="text-end">
                                 <form method="post" asp-page-handler="Remove" class="d-inline">
                                     <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="variantId" value="@item.ProductVariantId" />
                                     <button class="btn btn-outline-danger btn-sm" type="submit">Remove</button>
                                 </form>
                             </td>

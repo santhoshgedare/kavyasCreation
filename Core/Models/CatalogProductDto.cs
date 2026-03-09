@@ -7,5 +7,8 @@ namespace Core.Models
         decimal Price,
         int AvailableStock,
         string? CategoryName,
-        string? ImageUrl);
+        string? ImageUrl,
+        bool HasVariants = false,
+        decimal? MinVariantPrice = null,
+        decimal? MaxVariantPrice = null);
 }

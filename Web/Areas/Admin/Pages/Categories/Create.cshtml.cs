@@ -19,6 +19,9 @@ namespace Web.Areas.Admin.Pages.Categories
         [BindProperty]
         public Category Category { get; set; } = new();
 
+        [BindProperty]
+        public List<string> VariantTypeNames { get; set; } = [];
+
         public void OnGet()
         {
         }
@@ -31,6 +34,19 @@ namespace Web.Areas.Admin.Pages.Categories
             }
 
             Category.Id = Guid.NewGuid();
+
+            var sortOrder = 0;
+            foreach (var name in VariantTypeNames.Where(n => !string.IsNullOrWhiteSpace(n)))
+            {
+                Category.VariantTypes.Add(new CategoryVariantType
+                {
+                    Id = Guid.NewGuid(),
+                    CategoryId = Category.Id,
+                    Name = name.Trim(),
+                    SortOrder = sortOrder++
+                });
+            }
+
             await _unitOfWork.Categories.AddAsync(Category);
             return RedirectToPage("/Categories/Index", new { area = "Admin" });
         }

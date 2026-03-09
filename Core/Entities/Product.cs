@@ -7,13 +7,13 @@ namespace Core.Entities
         public Guid Id { get; set; }
         public Guid CategoryId { get; set; }
         public Category? Category { get; set; }
-        
-        public Guid? VendorId { get; set; } // Nullable for backward compatibility with existing products
-        public Vendor? Vendor { get; set; }
-        
+
         public List<ProductImage> Images { get; set; } = [];
         public List<ProductSpecification> Specifications { get; set; } = [];
         public List<ProductReview> Reviews { get; set; } = [];
+        public List<ProductVariant> Variants { get; set; } = [];
+
+        public bool HasVariants => Variants.Count > 0;
         
         [Required]
         [MaxLength(200)]
